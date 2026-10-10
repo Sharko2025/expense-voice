@@ -9,12 +9,15 @@ from app.config import get_settings
 pytestmark = pytest.mark.openai
 
 SAMPLES = Path(__file__).resolve().parents[1] / "samples"
+# Recorded on the Fold 8 on 2026-10-11. (amount, category, method)
 EXPECTED = {
-    "banh-mi.m4a": [20000],
-    "cafe-familymart.m4a": [27000],
-    "gui-xe.m4a": [5000],
-    "nuoc-cam-vincom.m4a": [10000, 15000],
-    "sieu-thi.m4a": [1200000],
+    "E1_1.m4a": [(20000, "Ăn sáng", None)],  # ăn sáng bánh mì hai chục ngàn
+    "E2_1.m4a": [(85000, "Ăn sáng", "transfer")],  # cơm với cá kho 85 ngàn chuyển khoản
+    "E3_1.m4a": [(420000, "Mua sắm", "card")],  # mua đồ trên Shopee 420 ngàn cà thẻ
+    "E4_1.m4a": [(45000, "Ăn trưa", None)],  # ăn trưa cơm 45 ngàn quán cơm Hà Nội
+    "E5_1.m4a": [(1050000, "Đi chợ/Siêu thị", None)],  # siêu thị Coopmart 1 triệu không trăm năm chục
+    "E6_1.m4a": [(120000, "Cafe/Đồ uống", None)],  # cà phê ở Trung Nguyên 120 ngàn
+    "E7_1.m4a": [(20000, "Gửi xe", None)],  # gửi xe máy hai chục ngàn
 }
 
 
@@ -34,14 +37,15 @@ def send(client, path):
     )
 
 
-@pytest.mark.parametrize("name,amounts", EXPECTED.items())
-def test_real_audio(real_client, name, amounts):
+@pytest.mark.parametrize("name,expected", EXPECTED.items())
+def test_real_audio(real_client, name, expected):
     path = SAMPLES / name
     if not path.exists():
         pytest.skip(f"missing sample {name}")
     resp = send(real_client, path)
     assert resp.status_code == 200, resp.text
-    assert sorted(t["amount_vnd"] for t in resp.json()["transactions"]) == amounts
+    got = sorted((t["amount_vnd"], t["category"], t["method"]) for t in resp.json()["transactions"])
+    assert got == sorted(expected, key=lambda e: e[0])
 
 
 def test_real_audio_without_amount(real_client):
