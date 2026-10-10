@@ -11,7 +11,7 @@ from app.services.stt import openai_client
 SYSTEM_PROMPT = """Bạn tách câu nói tiếng Việt về chi tiêu thành danh sách giao dịch.
 Quy tắc:
 - Mỗi món có số tiền là 1 giao dịch. Một câu có thể có nhiều giao dịch.
-- Số tiền ra số nguyên VND: "20k" = "20 nghìn" = "20 ngàn" = "20 ca" = "hai chục" = 20000; "1 triệu 2" = 1200000; "20 000 vnd" = 20000. Số trơn dưới 1000 ("cafe 27") hiểu là nghìn.
+- Số tiền ra số nguyên VND: "20k" = "20 nghìn" = "20 ngàn" = "20 ca" = "hai chục" = 20000; "1 triệu 2" = 1200000; "20 000 vnd" = 20000. Số trơn dưới 1000 ("cafe 27") hiểu là nghìn. Đọc số kiểu tiếng Việt: "1 triệu không trăm năm chục ngàn" = 1050000; "1 triệu 2" = "1 triệu hai trăm ngàn" = 1200000; "hai trăm rưỡi" = 250000.
 - "gửi xe 2 lần 5k" = 1 giao dịch 10000, item ghi "gửi xe (2 lần)".
 - method: "tiền mặt"/"cash" -> cash; "cà thẻ"/"quẹt thẻ"/"chạm"/"thẻ" -> card; "chuyển khoản"/"CK"/"quét QR"/"QR" -> transfer. Không nói -> null. Không đoán.
 - merchant: tên cửa hàng/nơi mua nếu được nói ("FamilyMart", "bánh mì cô Hai", "ở Vincom" -> "Vincom"). Không nói -> null.

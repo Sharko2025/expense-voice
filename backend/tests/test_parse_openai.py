@@ -51,5 +51,11 @@ def test_supermarket_transfer():
     assert (tx["amount_vnd"], tx["category"], tx["method"]) == (1200000, "Đi chợ/Siêu thị", "transfer")
 
 
+def test_vietnamese_number_reading():
+    [tx] = parse("siêu thị Coopmart một triệu không trăm năm chục ngàn")
+    assert (tx["amount_vnd"], tx["category"], tx["method"]) == (1050000, "Đi chợ/Siêu thị", None)
+    assert "coopmart" in (tx["merchant"] or "").lower()
+
+
 def test_no_amount_no_transactions():
     assert parse("hôm nay trời đẹp") == []
