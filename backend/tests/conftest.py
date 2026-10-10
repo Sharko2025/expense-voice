@@ -1,15 +1,18 @@
 import os
+import uuid
+from datetime import datetime, timezone
 
 import pytest
 from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
 from app.db import get_db
 from app.main import create_app
+from app.models import Category, Transaction, VoiceEntry
 
 TEST_DATABASE_URL = os.environ["TEST_DATABASE_URL"]
 
@@ -102,3 +105,27 @@ def parser(app):
     fake = FakeParser()
     app.dependency_overrides[get_parser] = lambda: fake
     return fake
+
+
+@pytest.fixture
+def make_tx(db):
+    def _make(occurred_at, item="bánh mì", amount=20000, category="Ăn sáng", method=None, entry=None, deleted=False):
+        if entry is None:
+            entry = VoiceEntry(id=uuid.uuid4(), recorded_at=occurred_at, status="parsed")
+            db.add(entry)
+            db.flush()
+        cat_id = db.scalar(select(Category.id).where(Category.name == category))
+        tx = Transaction(
+            voice_entry_id=entry.id,
+            occurred_at=occurred_at,
+            item=item,
+            amount_vnd=amount,
+            category_id=cat_id,
+            method=method,
+            deleted_at=datetime.now(timezone.utc) if deleted else None,
+        )
+        db.add(tx)
+        db.flush()
+        return tx
+
+    return _make

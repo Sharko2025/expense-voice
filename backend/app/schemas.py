@@ -1,8 +1,16 @@
 import uuid
 from datetime import datetime
-from typing import Literal
+from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import (
+    AwareDatetime,
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictInt,
+    StringConstraints,
+    field_validator,
+)
 
 from app.models import Transaction
 
@@ -51,3 +59,41 @@ class VoiceResult(BaseModel):
     entry_id: uuid.UUID
     raw_text: str | None
     transactions: list[TransactionOut]
+
+
+class TransactionPatch(BaseModel):
+    """Only the fields SPEC allows editing. Omitted fields stay unchanged."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    item: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)] = None
+    amount_vnd: Annotated[StrictInt, Field(gt=0)] = None
+    category_id: StrictInt | None = None
+    method: Literal["cash", "card", "transfer"] | None = None
+    merchant: str | None = None
+    occurred_at: AwareDatetime = None
+
+    @field_validator("item", "amount_vnd", "occurred_at", mode="before")
+    @classmethod
+    def not_null(cls, v):
+        if v is None:
+            raise ValueError("không được để trống")
+        return v
+
+
+class CategoryTotal(BaseModel):
+    category_id: int | None
+    category: str | None
+    total_vnd: int
+    count: int
+
+
+class SummaryOut(BaseModel):
+    month: str
+    total_vnd: int
+    count: int
+    prev_month: str
+    prev_total_vnd: int
+    diff_vnd: int
+    diff_pct: float | None  # display only; money stays integer
+    by_category: list[CategoryTotal]

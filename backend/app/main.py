@@ -4,7 +4,7 @@ import time
 from fastapi import Depends, FastAPI, Request
 
 from app.auth import require_token
-from app.routers import categories, health, voice
+from app.routers import categories, health, summary, transactions, voice
 
 log = logging.getLogger("expense_voice")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
@@ -28,6 +28,8 @@ def create_app() -> FastAPI:
     protected = [Depends(require_token)]
     app.include_router(categories.router, prefix="/api/v1", dependencies=protected)
     app.include_router(voice.router, prefix="/api/v1", dependencies=protected)
+    app.include_router(transactions.router, prefix="/api/v1", dependencies=protected)
+    app.include_router(summary.router, prefix="/api/v1", dependencies=protected)
     return app
 
 
