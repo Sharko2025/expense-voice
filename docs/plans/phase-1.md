@@ -1,6 +1,6 @@
 # Phase 1 — Backend + AI
 
-Trạng thái: **chờ Loi duyệt** · 2026-10-10
+Trạng thái: **hoàn thành** · duyệt 2026-10-10 · xong 2026-10-11
 
 Mục tiêu: backend chạy trên `https://expense-voice.s-itpro.com`, `curl` gửi audio thật → nhận đúng danh sách giao dịch; đủ mọi endpoint trong SPEC mục "API backend".
 
@@ -10,7 +10,7 @@ Checklist SPEC tương ứng:
 - [x] `POST /voice`: transcribe + parse + lưu, idempotent theo `entry_id` → Task 4–7
 - [x] Bộ test parse 6 câu ở mục Pipeline AI đều qua → Task 6
 - [x] Các endpoint giao dịch, summary, health → Task 8–10
-- [ ] Deploy lên EC2, nginx + SSL, `curl` từ ngoài gửi audio ra kết quả đúng → Task 11–12
+- [x] Deploy lên EC2, nginx + SSL, `curl` từ ngoài gửi audio ra kết quả đúng → Task 11–12
 
 ---
 
@@ -188,3 +188,12 @@ Trả danh mục `is_active` theo `sort_order`: `[{"id","name","sort_order"}]`. 
 3. OpenAI API key riêng cho project (đặt giới hạn chi tiêu tháng) — dùng ở `.env` local khi tới Task 6.
 4. 6 file audio ghi bằng Fold 8 (Task 6).
 5. Xác nhận trước khi push GitHub, và trước mỗi thao tác nginx/certbot trên server.
+
+## Kết quả (2026-10-11)
+
+- Test: 99 test nhanh + 15 test OpenAI thật (6 câu SPEC + câu đọc số Coopmart + 7 audio Fold 8) đều qua; test audio "không có số tiền" đang skip vì chưa có file mẫu.
+- Model: STT `gpt-4o-mini-transcribe`, parse `gpt-5.4-mini` (`temperature=0`).
+- Production `https://expense-voice.s-itpro.com`: health OK, HTTP → HTTPS 301, thiếu token → 401, chứng chỉ Let's Encrypt hết hạn 2027-01-08 (snap certbot tự gia hạn).
+- Thời gian thực đo trên EC2 (3 lần nói): `stt_ms` 1209–1422, `parse_ms` 1327–1359, `total_ms` 2602–2784. Gọi từ Việt Nam qua HTTPS: 2,9–3,1 s tính cả mạng → sát ngưỡng 3 s; đo tiếp sau 1 tuần dùng như SPEC đã định.
+- Gửi lại cùng `entry_id` qua HTTPS: 0,4 s, không tạo bản ghi trùng. Hoàn tác: 204.
+- Production DB còn 3 lần nói thử (đã Hoàn tác, xóa mềm), không ảnh hưởng tổng.

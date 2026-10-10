@@ -349,7 +349,7 @@ Làm backend trước và test bằng `curl` với file audio thu sẵn, sau đ�
 - [x] `POST /voice`: transcribe + parse + lưu, idempotent theo `entry_id`
 - [x] Bộ test parse 6 câu ở mục Pipeline AI đều qua
 - [x] Các endpoint giao dịch, summary, health
-- [ ] Deploy lên EC2, nginx + SSL, `curl` từ ngoài gửi audio ra kết quả đúng
+- [x] Deploy lên EC2, nginx + SSL, `curl` từ ngoài gửi audio ra kết quả đúng
 
 **Phase 2: Ghi âm trên Android**
 
