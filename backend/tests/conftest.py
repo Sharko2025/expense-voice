@@ -57,3 +57,48 @@ def client(app):
 @pytest.fixture
 def auth():
     return {"Authorization": f"Bearer {get_settings().device_token}"}
+
+
+class FakeTranscriber:
+    def __init__(self, text="bánh mì ăn sáng 20k tiền mặt", error=None):
+        self.text, self.error = text, error
+        self.calls = []  # (path, existed_at_call_time)
+
+    def transcribe(self, path):
+        self.calls.append((path, path.exists()))
+        if self.error:
+            raise self.error
+        return self.text
+
+
+class FakeParser:
+    def __init__(self, transactions=None, error=None):
+        self.transactions = transactions if transactions is not None else [
+            {"item": "bánh mì", "amount_vnd": 20000, "category": "Ăn sáng", "method": "cash", "merchant": None}
+        ]
+        self.error = error
+        self.calls = []  # (text, category_names)
+
+    def parse(self, text, category_names):
+        self.calls.append((text, category_names))
+        if self.error:
+            raise self.error
+        return self.transactions
+
+
+@pytest.fixture
+def stt(app):
+    from app.services.stt import get_transcriber
+
+    fake = FakeTranscriber()
+    app.dependency_overrides[get_transcriber] = lambda: fake
+    return fake
+
+
+@pytest.fixture
+def parser(app):
+    from app.services.parser import get_parser
+
+    fake = FakeParser()
+    app.dependency_overrides[get_parser] = lambda: fake
+    return fake
