@@ -6,10 +6,10 @@ Mục tiêu: backend chạy trên `https://expense-voice.s-itpro.com`, `curl` g�
 
 Checklist SPEC tương ứng:
 
-- [ ] Khởi tạo repo, Docker Compose, Alembic migration, seed danh mục → Task 1–3
+- [x] Khởi tạo repo, Docker Compose, Alembic migration, seed danh mục → Task 1–3
 - [ ] `POST /voice`: transcribe + parse + lưu, idempotent theo `entry_id` → Task 4–7
 - [ ] Bộ test parse 6 câu ở mục Pipeline AI đều qua → Task 6
-- [ ] Các endpoint giao dịch, summary, health → Task 8–10
+- [x] Các endpoint giao dịch, summary, health → Task 8–10
 - [ ] Deploy lên EC2, nginx + SSL, `curl` từ ngoài gửi audio ra kết quả đúng → Task 11–12
 
 ---

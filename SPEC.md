@@ -344,10 +344,10 @@ Làm backend trước và test bằng `curl` với file audio thu sẵn, sau đ�
 
 **Phase 1: Backend + AI**
 
-- [ ] Khởi tạo repo, Docker Compose, Alembic migration, seed danh mục
+- [x] Khởi tạo repo, Docker Compose, Alembic migration, seed danh mục
 - [ ] `POST /voice`: transcribe + parse + lưu, idempotent theo `entry_id`
 - [ ] Bộ test parse 6 câu ở mục Pipeline AI đều qua
-- [ ] Các endpoint giao dịch, summary, health
+- [x] Các endpoint giao dịch, summary, health
 - [ ] Deploy lên EC2, nginx + SSL, `curl` từ ngoài gửi audio ra kết quả đúng
 
 **Phase 2: Ghi âm trên Android**
