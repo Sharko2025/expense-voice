@@ -1,3 +1,5 @@
+name: expense-voice
+
 services:
   api:
     build: ../backend
