@@ -16,3 +16,8 @@
 - 2026-10-11 · Thứ tự giao dịch trong 1 lần nói (không có cột thứ tự) · Ghi `created_at = clock_timestamp()` từng dòng để giữ đúng thứ tự nói khi trả lại.
 - 2026-10-11 · Mọi model đọc "một triệu không trăm năm chục ngàn" thành 1150000 (đúng: 1050000), không ổn định · Đề xuất thêm vào system prompt trong SPEC, sau câu "Số trơn dưới 1000…": `Đọc số kiểu tiếng Việt: "1 triệu không trăm năm chục ngàn" = 1050000; "1 triệu 2" = "1 triệu hai trăm ngàn" = 1200000; "hai trăm rưỡi" = 250000.` Đã đo: gpt-5.4-mini 39/39. **Đã duyệt 2026-10-11**, đã cập nhật SPEC, code, bộ test.
 - 2026-10-11 · Chưa có file audio thật cho câu không có số tiền (test 422 bằng audio đang skip) · Ghi thêm 1 file, ví dụ "hôm nay trời đẹp", đặt tên `troi-dep.m4a`.
+- 2026-10-11 · Nhấn đúp nút nguồn trên Samsung chỉ mở activity launcher của app · App có 2 icon: "Chi tiêu" (xem) và "Ghi chi tiêu" (ghi âm ngay); chọn "Ghi chi tiêu" cho phím bên. Thử trên Fold 8.
+- 2026-10-11 · Mở ghi âm nhưng không nói gì · 8 s đầu không có tiếng nói → hủy, không upload, báo "Không nghe thấy gì".
+- 2026-10-11 · Phản hồi khi chưa có kết quả (đang gửi / mất mạng) · Notification im lặng "⏳ Đang gửi…" / "Đã lưu, sẽ gửi khi có mạng", được thay bằng kết quả.
+- 2026-10-11 · Widget màn hình ngoài Fold 8 có thể cần meta-data riêng của Samsung · Thử trên máy, thêm nếu cần.
+- 2026-10-11 · `EncryptedSharedPreferences` đã bị Google đánh dấu deprecated · Vẫn dùng theo SPEC (chạy tốt, chỉ lưu 1 token); đổi sau nếu bị gỡ.
