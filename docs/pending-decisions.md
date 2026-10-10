@@ -11,3 +11,6 @@
 - 2026-10-10 · Format response `GET /summary` chưa có trong SPEC · Dùng format trong `docs/plans/phase-1.md` Task 9.
 - 2026-10-10 · `GET /transactions` thiếu `from`/`to` · Mặc định hôm nay (giờ VN); `from`/`to` bao gồm cả 2 đầu.
 - 2026-10-10 · `recorded_at` không có múi giờ · Trả 422 thay vì tự đoán múi giờ.
+- 2026-10-11 · Entry kẹt ở `received`/`transcribed` (server restart giữa chừng) sẽ trả 409 mãi · Sau 2 phút cho phép xử lý lại; khi xử lý lại thì `received_at` được cập nhật thành thời điểm bắt đầu lần xử lý mới.
+- 2026-10-11 · `backup.sh` cần S3 bucket + quyền ghi trên EC2 (SPEC chưa có tên bucket) · Thêm biến `BACKUP_S3_URI` vào `.env`; Loi cung cấp bucket ở Phase 4.
+- 2026-10-11 · Thứ tự giao dịch trong 1 lần nói (không có cột thứ tự) · Ghi `created_at = clock_timestamp()` từng dòng để giữ đúng thứ tự nói khi trả lại.
