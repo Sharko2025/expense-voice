@@ -84,6 +84,7 @@ class RecordActivity : ComponentActivity() {
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             toast("Cấp quyền micro trước nhé")
+            done = true
             finish()
             return
         }
