@@ -162,6 +162,11 @@ android/app/src/main/java/com/sitpro/expensevoice/
 2. Task 0: cài Android Studio + kết nối Fold 8 qua Wireless debugging.
 3. Thử trên máy ở Task 9 và 13 (em hướng dẫn từng bước).
 
+## Task bổ sung (Loi yêu cầu 2026-10-11)
+
+- [x] Nút ghi âm trong app: tròn 80dp, đặt giữa phía dưới (trên thanh tab), hiện ở cả Hôm nay và Tháng này. Chờ Loi xem trên máy.
+- [x] Tài liệu hướng dẫn cài đặt trên Fold 8: `docs/fold8-setup.md` (ghép nối adb, nút nguồn, Quick Settings, widget, pin).
+
 ## Nhật ký thử trên Fold 8
 
 **2026-10-11** (SM-F971B, Android 17 / API 37, One UI 9)

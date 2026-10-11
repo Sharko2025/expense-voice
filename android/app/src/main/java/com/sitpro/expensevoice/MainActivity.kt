@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,6 +34,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -141,8 +146,16 @@ private fun MainScaffold(
             }
         },
         floatingActionButton = {
-            if (tab == Tab.TODAY) FloatingActionButton(onClick = onRecord) { Icon(Icons.Filled.Mic, "Ghi âm") }
+            // Big, centered mic: recording is the main action of the app.
+            if (tab != Tab.SETTINGS) {
+                FloatingActionButton(
+                    onClick = onRecord,
+                    modifier = Modifier.size(80.dp),
+                    shape = CircleShape,
+                ) { Icon(Icons.Filled.Mic, "Ghi âm", Modifier.size(40.dp)) }
+            }
         },
+        floatingActionButtonPosition = FabPosition.Center,
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
         when (tab) {

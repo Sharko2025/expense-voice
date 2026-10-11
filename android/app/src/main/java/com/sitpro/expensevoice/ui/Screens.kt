@@ -95,7 +95,7 @@ fun TodayScreen(vm: TodayViewModel, contentPadding: PaddingValues) {
     var editing by remember { mutableStateOf<CachedTransaction?>(null) }
 
     PullToRefreshBox(refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 96.dp)) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 112.dp)) {
             item {
                 Column(Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
                     PeriodHeader(dayTitle(day, today()), canGoForward(day, today()), { vm.shiftDay(-1) }, { vm.shiftDay(1) })
@@ -245,7 +245,7 @@ fun MonthScreen(vm: MonthViewModel, contentPadding: PaddingValues) {
     val error by vm.error.collectAsState()
 
     PullToRefreshBox(refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize().padding(contentPadding)) {
-        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 96.dp)) {
+        LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 112.dp)) {
             item {
                 Column(Modifier.padding(8.dp)) {
                     PeriodHeader(monthTitle(month), canGoForward(month, currentMonth()), { vm.shiftMonth(-1) }, { vm.shiftMonth(1) })
