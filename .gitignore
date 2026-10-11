@@ -19,9 +19,11 @@ android/build/
 android/app/build/
 android/local.properties
 android/.idea/
+android/app/schemas/*.tmp
 *.apk
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
+android/.kotlin/
