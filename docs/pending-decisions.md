@@ -21,3 +21,4 @@
 - 2026-10-11 · Phản hồi khi chưa có kết quả (đang gửi / mất mạng) · Notification im lặng "⏳ Đang gửi…" / "Đã lưu, sẽ gửi khi có mạng", được thay bằng kết quả.
 - 2026-10-11 · Widget màn hình ngoài Fold 8 có thể cần meta-data riêng của Samsung · Thử trên máy, thêm nếu cần.
 - 2026-10-11 · `EncryptedSharedPreferences` đã bị Google đánh dấu deprecated · Vẫn dùng theo SPEC (chạy tốt, chỉ lưu 1 token); đổi sau nếu bị gỡ.
+- 2026-10-11 · Song ngữ Việt/English (yêu cầu mới, chưa có trong SPEC) · Loi chốt: giao diện theo ngôn ngữ máy, nói được cả 2 thứ tiếng, danh mục dịch khi hiển thị. Kế hoạch `docs/plans/bilingual.md`; cập nhật SPEC sau khi xong.
