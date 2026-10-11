@@ -1,3 +1,10 @@
 <resources>
     <style name="Theme.ExpenseVoice" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.ExpenseVoice.Record" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Chi tiêu</string>
+    <string name="record_label">Ghi chi tiêu</string>
+    <string name="widget_description">Nút ghi chi tiêu bằng giọng nói</string>
 </resources>
