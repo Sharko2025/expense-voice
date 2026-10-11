@@ -161,3 +161,14 @@ android/app/src/main/java/com/sitpro/expensevoice/
 1. Duyệt plan (đặc biệt: 2 icon cho nút nguồn, hủy khi 8 s không nói, notification "Đang gửi…").
 2. Task 0: cài Android Studio + kết nối Fold 8 qua Wireless debugging.
 3. Thử trên máy ở Task 9 và 13 (em hướng dẫn từng bước).
+
+## Nhật ký thử trên Fold 8
+
+**2026-10-11** (SM-F971B, Android 17 / API 37, One UI 9)
+
+- Kết nối adb qua Wi-Fi chỉ được khi tắt FortiClient VPN trên laptop (VPN chặn mạng LAN).
+- Cài debug APK, nhập token production qua adb → Cài đặt báo "Kết nối OK"; màn Hôm nay tải được.
+- ✅ Ghi từ nút micro trong app: "tiền xe Grab hai trăm mười bốn ngàn" → tiền xe Grab · 214.000đ · method null. Server: `stt_ms` 1463, `parse_ms` 1932, `total_ms` 3408. File audio đã bị xóa khỏi `files/pending`.
+- ✅ Quick Settings tile "Ghi chi tiêu": chạy được.
+- ❌ Nút nguồn: danh sách "Open app" của Samsung không có icon "Ghi chi tiêu" (1 dòng mỗi app). Đã đổi manifest để `RecordActivity` là launcher activity đầu tiên; cài lại, chờ thử.
+- Chưa thử: Hoàn tác từ notification, ghi trên màn hình khóa, widget (màn hình chính + màn hình ngoài), chế độ máy bay, sửa/xóa trên Hôm nay, Tháng này, thời gian từ lúc ngừng nói tới notification ✓.

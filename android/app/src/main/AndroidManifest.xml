@@ -15,18 +15,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ExpenseVoice">
 
-        <!-- Icon "Chi tiêu": Today / Month screens -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <!-- Icon "Ghi chi tiêu": records immediately. Pick this one for the side key double-press.
+        <!-- Icon "Ghi chi tiêu": records immediately. Declared FIRST on purpose: Samsung's side-key
+             "Open app" lists one entry per app and launches its first launcher activity.
              configChanges: folding/unfolding must not restart the activity mid-recording. -->
         <activity
             android:name=".capture.RecordActivity"
@@ -41,6 +31,17 @@
             android:showWhenLocked="true"
             android:turnScreenOn="true"
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|density|keyboardHidden|keyboard|navigation|uiMode|fontScale">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Icon "Chi tiêu": Today / Month screens -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
