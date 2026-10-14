@@ -45,6 +45,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -206,9 +211,10 @@ private fun EditSheet(
     var pickDate by remember { mutableStateOf(false) }
     var pickTime by remember { mutableStateOf(false) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    // Fully expanded so Save is visible; scrollable for the small cover screen.
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
-            Modifier.padding(horizontal = 20.dp).padding(bottom = 24.dp),
+            Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(stringResource(R.string.edit_title), style = MaterialTheme.typography.titleLarge)
@@ -317,8 +323,13 @@ private fun EditSheet(
 private fun PickerField(label: String, value: String, modifier: Modifier, onClick: () -> Unit) {
     Box(modifier) {
         OutlinedTextField(value, {}, Modifier.fillMaxWidth(), readOnly = true, label = { Text(label) }, singleLine = true)
-        // Transparent overlay: a read-only text field swallows clicks otherwise.
-        Box(Modifier.matchParentSize().clickable(onClick = onClick))
+        // Transparent overlay: a read-only text field swallows clicks otherwise. It carries the
+        // label and value so screen readers (and adb UI dumps) still see the field.
+        Box(
+            Modifier.matchParentSize()
+                .clickable(onClick = onClick)
+                .semantics(mergeDescendants = true) { contentDescription = "$label: $value" }
+        )
     }
 }
 

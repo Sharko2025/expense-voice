@@ -104,3 +104,14 @@ Hiện màn sửa không có ô ngày giờ, nên giao dịch ghi muộn (ví d�
    - `en-groceries.m4a`: "groceries one point two million bank transfer"
    - `en-weather.m4a`: "the weather is nice today"
    (nếu có thể, nhờ thêm 1–2 câu bằng giọng người nước ngoài sẽ demo)
+
+## Kết quả (2026-10-15)
+
+- Backend song ngữ đã deploy lên EC2; audio tiếng Việt qua HTTPS vẫn đúng (E6: cà phê · 120.000đ · Trung Nguyên).
+- Android: 70 unit test qua (gồm `TextsEnglishTest`, `TextsVietnameseTest`, `StringsCompletenessTest`).
+- Trên Fold 8 (máy để en-GB):
+  - English: "Shark Wallet", "Today", "Sun, 11 Oct", "October 2026", "+698.000đ vs last month", danh mục Breakfast / Fuel/Transport ✅
+  - Đổi riêng app sang tiếng Việt (`cmd locale set-app-locales … vi`): "Cá Mập Ví", "Thứ Ba, 13/10", "Tháng 10/2026", "so với tháng trước" ✅ — đổi qua lại có hiệu lực ngay.
+  - Màn sửa: có ô Date/Time; mở hết chiều cao (trước đó nửa chừng, phải kéo mới thấy Save) và cuộn được; DatePicker mở đúng ngày.
+- Còn lại: audio tiếng Anh thật (Loi nhờ người Mỹ ghi sau); thử lưu đổi ngày/giờ trên máy (để Loi tự làm trên dữ liệu thật).
+- Ghi chú: adb trong `C:\Users\loi\platform-tools` quá cũ, không nhận Fold 8 qua USB → dùng `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`.
