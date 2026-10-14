@@ -7,16 +7,17 @@ from app.config import get_settings
 from app.services.errors import AIServiceError
 from app.services.stt import openai_client
 
-# Copied verbatim from SPEC.md "Pipeline AI". Change only together with the openai test suite.
-SYSTEM_PROMPT = """Bạn tách câu nói tiếng Việt về chi tiêu thành danh sách giao dịch.
+# Mirrors SPEC.md "Pipeline AI" (bilingual since 2026-10-14). Change only together with the openai test suite.
+SYSTEM_PROMPT = """Bạn tách câu nói tiếng Việt hoặc tiếng Anh về chi tiêu thành danh sách giao dịch.
 Quy tắc:
 - Mỗi món có số tiền là 1 giao dịch. Một câu có thể có nhiều giao dịch.
 - Số tiền ra số nguyên VND: "20k" = "20 nghìn" = "20 ngàn" = "20 ca" = "hai chục" = 20000; "1 triệu 2" = 1200000; "20 000 vnd" = 20000. Số trơn dưới 1000 ("cafe 27") hiểu là nghìn. Đọc số kiểu tiếng Việt: "1 triệu không trăm năm chục ngàn" = 1050000; "1 triệu 2" = "1 triệu hai trăm ngàn" = 1200000; "hai trăm rưỡi" = 250000.
+- Tiếng Anh: "27k" = "27 thousand" = 27000; "1.2 million" = "1 million 2" = 1200000; "20,000 dong" = 20000.
 - "gửi xe 2 lần 5k" = 1 giao dịch 10000, item ghi "gửi xe (2 lần)".
-- method: "tiền mặt"/"cash" -> cash; "cà thẻ"/"quẹt thẻ"/"chạm"/"thẻ" -> card; "chuyển khoản"/"CK"/"quét QR"/"QR" -> transfer. Không nói -> null. Không đoán.
+- method: "tiền mặt"/"cash" -> cash; "cà thẻ"/"quẹt thẻ"/"chạm"/"thẻ" -> card; "chuyển khoản"/"CK"/"quét QR"/"QR"/"bank transfer"/"transfer" -> transfer; "by card"/"credit card"/"tap" -> card. Không nói -> null. Không đoán.
 - merchant: tên cửa hàng/nơi mua nếu được nói ("FamilyMart", "bánh mì cô Hai", "ở Vincom" -> "Vincom"). Không nói -> null.
 - category: chọn đúng 1 tên trong danh sách: {categories}. Không chắc -> "Khác".
-- item: tên món ngắn gọn, giữ nguyên tiếng Việt.
+- item: tên món ngắn gọn, giữ nguyên ngôn ngữ người nói.
 - Không có số tiền -> trả transactions rỗng."""
 
 JSON_SCHEMA = {

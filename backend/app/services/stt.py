@@ -7,8 +7,11 @@ import openai
 from app.config import get_settings
 from app.services.errors import AIServiceError
 
-# Vocabulary hint so Vietnamese shorthand is transcribed correctly (SPEC: Pipeline AI, step 1).
-STT_PROMPT = "k, nghìn, ca, cà thẻ, chuyển khoản, tiền mặt, FamilyMart, Circle K, GrabFood, gửi xe"
+# Vocabulary hint so Vietnamese and English shorthand is transcribed correctly (SPEC: Pipeline AI, step 1).
+STT_PROMPT = (
+    "k, nghìn, ngàn, ca, cà thẻ, chuyển khoản, tiền mặt, FamilyMart, Circle K, GrabFood, gửi xe, "
+    "thousand, million, cash, card, bank transfer, parking, coffee, breakfast"
+)
 
 
 class Transcriber(Protocol):
@@ -16,14 +19,16 @@ class Transcriber(Protocol):
 
 
 class OpenAITranscriber:
-    def __init__(self, client: openai.OpenAI, model: str):
-        self.client, self.model = client, model
+    def __init__(self, client: openai.OpenAI, model: str, language: str = ""):
+        self.client, self.model, self.language = client, model, language
 
     def transcribe(self, path: Path) -> str:
+        # Empty language = auto-detect, so both Vietnamese and English speech work.
+        extra = {"language": self.language} if self.language else {}
         try:
             with path.open("rb") as f:
                 result = self.client.audio.transcriptions.create(
-                    model=self.model, file=f, language="vi", prompt=STT_PROMPT
+                    model=self.model, file=f, prompt=STT_PROMPT, **extra
                 )
         except openai.OpenAIError as e:
             raise AIServiceError(type(e).__name__) from e
@@ -38,4 +43,5 @@ def openai_client() -> openai.OpenAI:
 
 
 def get_transcriber() -> Transcriber:
-    return OpenAITranscriber(openai_client(), get_settings().openai_stt_model)
+    settings = get_settings()
+    return OpenAITranscriber(openai_client(), settings.openai_stt_model, settings.openai_stt_language)

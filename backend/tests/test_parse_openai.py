@@ -59,3 +59,31 @@ def test_vietnamese_number_reading():
 
 def test_no_amount_no_transactions():
     assert parse("hôm nay trời đẹp") == []
+
+
+# ---- English (bilingual MVP, docs/plans/bilingual.md) ----
+
+
+def test_en_coffee_card_merchant():
+    [tx] = parse("coffee 27k at FamilyMart by card")
+    assert "coffee" in tx["item"].lower()
+    assert (tx["amount_vnd"], tx["category"], tx["method"], tx["merchant"]) == (27000, "Cafe/Đồ uống", "card", "FamilyMart")
+
+
+def test_en_breakfast_cash():
+    [tx] = parse("breakfast banh mi 20 thousand cash")
+    assert (tx["amount_vnd"], tx["category"], tx["method"]) == (20000, "Ăn sáng", "cash")
+
+
+def test_en_parking_no_method():
+    [tx] = parse("parking 5 thousand")
+    assert (tx["amount_vnd"], tx["category"], tx["method"], tx["merchant"]) == (5000, "Gửi xe", None, None)
+
+
+def test_en_groceries_transfer():
+    [tx] = parse("groceries 1.2 million bank transfer")
+    assert (tx["amount_vnd"], tx["category"], tx["method"]) == (1200000, "Đi chợ/Siêu thị", "transfer")
+
+
+def test_en_no_amount():
+    assert parse("the weather is nice today") == []
