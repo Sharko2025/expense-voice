@@ -132,8 +132,8 @@ Hai lần gọi OpenAI: transcribe audio thành chữ, rồi parse chữ thành 
 
 **Bước 1: Transcribe**
 
-- Model: `gpt-4o-mini-transcribe` (đổi qua biến `OPENAI_STT_MODEL`), `language="vi"`.
-- Tham số `prompt` gợi ý từ vựng: `"k, nghìn, ca, cà thẻ, chuyển khoản, tiền mặt, FamilyMart, Circle K, GrabFood, gửi xe"` để nhận đúng cách nói tắt.
+- Model: `gpt-4o-mini-transcribe` (đổi qua biến `OPENAI_STT_MODEL`). Không cố định `language` để nhận cả tiếng Việt và tiếng Anh (biến `OPENAI_STT_LANGUAGE`, rỗng = tự nhận, `vi` = chỉ tiếng Việt). Đã đo 2026-10-15: bỏ `language="vi"` không làm kém 7 audio tiếng Việt.
+- Tham số `prompt` gợi ý từ vựng: `"k, nghìn, ngàn, ca, cà thẻ, chuyển khoản, tiền mặt, FamilyMart, Circle K, GrabFood, gửi xe, thousand, million, cash, card, bank transfer, parking, coffee, breakfast"` để nhận đúng cách nói tắt.
 
 **Bước 2: Parse**
 
@@ -143,15 +143,16 @@ Hai lần gọi OpenAI: transcribe audio thành chữ, rồi parse chữ thành 
 System prompt:
 
 ```text
-Bạn tách câu nói tiếng Việt về chi tiêu thành danh sách giao dịch.
+Bạn tách câu nói tiếng Việt hoặc tiếng Anh về chi tiêu thành danh sách giao dịch.
 Quy tắc:
 - Mỗi món có số tiền là 1 giao dịch. Một câu có thể có nhiều giao dịch.
 - Số tiền ra số nguyên VND: "20k" = "20 nghìn" = "20 ngàn" = "20 ca" = "hai chục" = 20000; "1 triệu 2" = 1200000; "20 000 vnd" = 20000. Số trơn dưới 1000 ("cafe 27") hiểu là nghìn. Đọc số kiểu tiếng Việt: "1 triệu không trăm năm chục ngàn" = 1050000; "1 triệu 2" = "1 triệu hai trăm ngàn" = 1200000; "hai trăm rưỡi" = 250000.
+- Tiếng Anh: "27k" = "27 thousand" = 27000; "1.2 million" = "1 million 2" = 1200000; "20,000 dong" = 20000.
 - "gửi xe 2 lần 5k" = 1 giao dịch 10000, item ghi "gửi xe (2 lần)".
-- method: "tiền mặt"/"cash" -> cash; "cà thẻ"/"quẹt thẻ"/"chạm"/"thẻ" -> card; "chuyển khoản"/"CK"/"quét QR"/"QR" -> transfer. Không nói -> null. Không đoán.
+- method: "tiền mặt"/"cash" -> cash; "cà thẻ"/"quẹt thẻ"/"chạm"/"thẻ" -> card; "chuyển khoản"/"CK"/"quét QR"/"QR"/"bank transfer"/"transfer" -> transfer; "by card"/"credit card"/"tap" -> card. Không nói -> null. Không đoán.
 - merchant: tên cửa hàng/nơi mua nếu được nói ("FamilyMart", "bánh mì cô Hai", "ở Vincom" -> "Vincom"). Không nói -> null.
 - category: chọn đúng 1 tên trong danh sách: {categories}. Không chắc -> "Khác".
-- item: tên món ngắn gọn, giữ nguyên tiếng Việt.
+- item: tên món ngắn gọn, giữ nguyên ngôn ngữ người nói.
 - Không có số tiền -> trả transactions rỗng.
 ```
 
@@ -193,10 +194,17 @@ JSON Schema (strict):
 | đi siêu thị 1 triệu 2 chuyển khoản | 1200000 · Đi chợ/Siêu thị · transfer |
 | siêu thị Coopmart một triệu không trăm năm chục ngàn | 1050000 · Đi chợ/Siêu thị · null · Coopmart |
 | hôm nay trời đẹp | 0 giao dịch → 422 |
+| coffee 27k at FamilyMart by card | coffee · 27000 · Cafe/Đồ uống · card · FamilyMart |
+| breakfast banh mi 20 thousand cash | 20000 · Ăn sáng · cash |
+| parking 5 thousand | 5000 · Gửi xe · null · null |
+| groceries 1.2 million bank transfer | 1200000 · Đi chợ/Siêu thị · transfer |
+| the weather is nice today | 0 giao dịch → 422 |
 
 ## Android app
 
 App có 2 phần: luồng ghi âm (chạy được từ màn hình khóa, không cần mở giao diện chính) và 2 màn hình xem đơn giản.
+
+**Tên và ngôn ngữ** (bổ sung 2026-10-14): tên app **Cá Mập Ví** / **Shark Wallet**. Giao diện song ngữ theo ngôn ngữ máy (English mặc định, tiếng Việt khi máy hoặc app chọn tiếng Việt; đổi riêng cho app ở Settings → Apps → Language). Danh mục lưu tiếng Việt trên server, app dịch khi hiển thị. Tiền luôn hiển thị dạng `20.000đ`.
 
 **Cấu trúc project**
 
@@ -223,7 +231,7 @@ app/src/main/java/.../
 
 - Tổng chi hôm nay ở trên cùng.
 - Danh sách giao dịch mới nhất trước: giờ · món · số tiền · danh mục · phương thức (để trống thì hiện dấu `?`).
-- Chạm vào 1 dòng → bottom sheet sửa (item, số tiền, danh mục, phương thức, nơi mua) hoặc xóa.
+- Chạm vào 1 dòng → bottom sheet sửa (item, số tiền, ngày, giờ, danh mục, phương thức, nơi mua) hoặc xóa. Ngày giờ theo giờ Việt Nam, không cho chọn tương lai; chuyển sang ngày khác thì báo "Đã chuyển sang dd/MM".
 - Kéo xuống để tải lại; chuyển ngày bằng mũi tên trái/phải.
 - Nút micro nổi để ghi âm ngay trong app.
 
