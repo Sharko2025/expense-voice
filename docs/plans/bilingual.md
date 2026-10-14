@@ -78,8 +78,8 @@ Hiện màn sửa không có ô ngày giờ, nên giao dịch ghi muộn (ví d�
 
 - Màn sửa thêm 2 ô: **Ngày** (DatePicker Material 3) và **Giờ** (TimePicker, 24h). Hiển thị và chọn theo **giờ Việt Nam**.
 - Gửi `occurred_at` dạng ISO có offset `+07:00`, chỉ khi ngày hoặc giờ thật sự đổi.
-- Không cho chọn thời điểm **ở tương lai** (chặn trong picker và trong kiểm tra trước khi lưu). *Đề xuất.*
-- Đổi sang ngày khác → giao dịch rời khỏi danh sách ngày đang xem (cache đã xử lý sẵn); Snackbar "Đã chuyển sang 12/10" để không tưởng là bị mất. *Đề xuất.*
+- Không cho chọn thời điểm **ở tương lai** (chặn trong picker và trong kiểm tra trước khi lưu). **Loi duyệt 2026-10-14.**
+- Đổi sang ngày khác → giao dịch rời khỏi danh sách ngày đang xem (cache đã xử lý sẵn); Snackbar "Đã chuyển sang 12/10" để không tưởng là bị mất. **Loi duyệt 2026-10-14.**
 - Song ngữ ngay từ đầu (chữ trên ô, nút OK/Hủy theo ngôn ngữ máy).
 - Test (TDD): `buildPatch` có `occurred_at` khi đổi ngày/giờ, không có khi giữ nguyên; ghép ngày + giờ thành đúng mốc UTC (ví dụ 11/10 23:30 giờ VN = 16:30Z); chặn tương lai.
 - Cập nhật SPEC mục "Màn hình Hôm nay" (bottom sheet sửa thêm ngày giờ).
