@@ -22,3 +22,4 @@
 - 2026-10-11 · Widget màn hình ngoài Fold 8 có thể cần meta-data riêng của Samsung · Thử trên máy, thêm nếu cần.
 - 2026-10-11 · `EncryptedSharedPreferences` đã bị Google đánh dấu deprecated · Vẫn dùng theo SPEC (chạy tốt, chỉ lưu 1 token); đổi sau nếu bị gỡ.
 - 2026-10-11 · Song ngữ Việt/English (yêu cầu mới, chưa có trong SPEC) · Loi chốt: giao diện theo ngôn ngữ máy, nói được cả 2 thứ tiếng, danh mục dịch khi hiển thị. Kế hoạch `docs/plans/bilingual.md`; cập nhật SPEC sau khi xong.
+- 2026-10-14 · Màn sửa giao dịch chưa có ngày/giờ (SPEC chỉ liệt kê món, tiền, danh mục, phương thức, nơi mua; API đã hỗ trợ `occurred_at`) · Thêm DatePicker + TimePicker theo giờ VN, không cho chọn tương lai. Gộp vào `docs/plans/bilingual.md` mục D.

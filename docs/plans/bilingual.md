@@ -1,4 +1,4 @@
-# Song ngữ Việt / English cho MVP
+# Song ngữ Việt / English cho MVP + sửa ngày giờ giao dịch
 
 Trạng thái: **chờ Loi duyệt** · 2026-10-11 · ưu tiên làm 2026-10-12 (Loi cần demo với người nước ngoài)
 
@@ -72,18 +72,31 @@ Thêm vào `test_parse_openai.py`:
 - Unit test format/logic chạy với cả 2 ngôn ngữ (Robolectric `@Config(qualifiers = "en")` và `"vi"`).
 - Kiểm tra mọi chuỗi trong `values/` đều có bản trong `values-vi/` (test tự động).
 
+## D. Sửa ngày / giờ giao dịch (Loi phát hiện 2026-10-14)
+
+Hiện màn sửa không có ô ngày giờ, nên giao dịch ghi muộn (ví dụ tối mới nhớ khoản ăn trưa) không chỉnh được thời điểm. API `PATCH /transactions/{id}` đã nhận `occurred_at`, **backend không cần sửa**.
+
+- Màn sửa thêm 2 ô: **Ngày** (DatePicker Material 3) và **Giờ** (TimePicker, 24h). Hiển thị và chọn theo **giờ Việt Nam**.
+- Gửi `occurred_at` dạng ISO có offset `+07:00`, chỉ khi ngày hoặc giờ thật sự đổi.
+- Không cho chọn thời điểm **ở tương lai** (chặn trong picker và trong kiểm tra trước khi lưu). *Đề xuất.*
+- Đổi sang ngày khác → giao dịch rời khỏi danh sách ngày đang xem (cache đã xử lý sẵn); Snackbar "Đã chuyển sang 12/10" để không tưởng là bị mất. *Đề xuất.*
+- Song ngữ ngay từ đầu (chữ trên ô, nút OK/Hủy theo ngôn ngữ máy).
+- Test (TDD): `buildPatch` có `occurred_at` khi đổi ngày/giờ, không có khi giữ nguyên; ghép ngày + giờ thành đúng mốc UTC (ví dụ 11/10 23:30 giờ VN = 16:30Z); chặn tương lai.
+- Cập nhật SPEC mục "Màn hình Hôm nay" (bottom sheet sửa thêm ngày giờ).
+
 ## C. Kiểm chứng trên Fold 8
 
 1. Máy để English: toàn bộ app, notification, tile, widget là English.
 2. Đổi riêng app sang Tiếng Việt: toàn bộ chuyển sang tiếng Việt.
 3. Nói tiếng Anh: "coffee 27k by card" → ✓ notification đúng.
 4. Nói tiếng Việt: vẫn đúng như trước.
+5. Sửa giờ một giao dịch trong cùng ngày; chuyển một giao dịch sang hôm qua → biến khỏi Hôm nay, có ở Hôm qua, tổng 2 ngày đúng; kiểm tra lại trên server.
 
 ---
 
 ## Cần Loi
 
-1. **Duyệt plan** (đặc biệt: định dạng tiền giữ `20.000đ`; tên app English "Expense Voice").
+1. **Duyệt plan** (đặc biệt: định dạng tiền giữ `20.000đ`; tên app English "Expense Voice"; không cho chọn giờ ở tương lai).
 2. **Ghi 5 câu tiếng Anh** bằng Fold 8 (app Voice Recorder, xuất m4a) vào `samples/`:
    - `en-coffee.m4a`: "coffee twenty seven thousand at FamilyMart by card"
    - `en-breakfast.m4a`: "breakfast banh mi twenty thousand cash"
