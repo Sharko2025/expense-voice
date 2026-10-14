@@ -1,6 +1,6 @@
 # Song ngữ Việt / English cho MVP + sửa ngày giờ giao dịch
 
-Trạng thái: **chờ Loi duyệt** · 2026-10-11 · ưu tiên làm 2026-10-12 (Loi cần demo với người nước ngoài)
+Trạng thái: **đã duyệt 2026-10-14**, đang làm · viết 2026-10-11 · ưu tiên làm 2026-10-12 (Loi cần demo với người nước ngoài)
 
 Đây là yêu cầu mới, chưa có trong SPEC. Phạm vi Loi đã chốt (2026-10-11):
 
@@ -56,7 +56,7 @@ Thêm vào `test_parse_openai.py`:
   - `res/values/strings.xml`: **English** (mặc định cho mọi máy không phải tiếng Việt).
   - `res/values-vi/strings.xml`: tiếng Việt (giữ nguyên chữ hiện tại).
 - Khai báo `locales_config.xml` → hiện mục **Language** riêng cho app trong Settings của Android.
-- Tên app: "Expense Voice" / "Chi tiêu"; icon ghi âm: "Record expense" / "Ghi chi tiêu".
+- Tên app: **"Cá Mập Ví"** (tiếng Việt) / **"Shark Wallet"** (English) — theo biệt danh Sharko của Loi (duyệt 2026-10-14). Icon ghi âm: "Ghi chi tiêu" / "Record expense".
 - Gồm: màn Hôm nay / Tháng này / Cài đặt, màn ghi âm, notification (✓, Hoàn tác, Đang gửi…, Không hiểu…), Snackbar, thông báo lỗi, tile, widget.
 
 ### B2. Dữ liệu hiển thị
@@ -64,7 +64,7 @@ Thêm vào `test_parse_openai.py`:
 - **Danh mục:** bảng dịch theo tên tiếng Việt → chuỗi resource (`Ăn sáng` → Breakfast, `Cafe/Đồ uống` → Coffee/Drinks, `Gửi xe` → Parking, `Đi chợ/Siêu thị` → Groceries…). Tên lạ → giữ nguyên.
 - **Phương thức:** Cash / Card / Transfer / `?`.
 - **Ngày:** "Today" / "Yesterday" / "Thu, 08 Oct" theo ngôn ngữ máy. Giờ vẫn theo giờ Việt Nam.
-- **Tiền:** giữ một kiểu `20.000đ` cho cả 2 ngôn ngữ (tiền là VND, người nước ngoài ở VN quen cách viết này). *Đề xuất, Loi có thể đổi thành `20,000₫` khi English.*
+- **Tiền:** giữ một kiểu `20.000đ` cho cả 2 ngôn ngữ (tiền là VND, người nước ngoài ở VN quen cách viết này). **Loi duyệt 2026-10-14.**
 - **Lỗi từ server:** app không hiện nguyên câu tiếng Việt của server. App tự hiện câu theo mã lỗi (401, 422, 5xx…), riêng `raw_text` (câu đã nghe) vẫn hiện nguyên văn.
 
 ### B3. Test (TDD)
