@@ -17,6 +17,7 @@ fun groupThousands(value: Long): String {
     return if (value < 0) "-$grouped" else grouped
 }
 
+/** Same in both languages: amounts are VND, written the Vietnamese way. */
 fun formatVnd(amount: Long): String = groupThousands(amount) + "đ"
 
 fun formatAmountInput(amount: Long): String = groupThousands(amount)
@@ -29,25 +30,13 @@ fun parseAmountInput(text: String): Long? {
     return value.takeIf { it > 0 }
 }
 
-fun methodLabel(method: String?): String = when (method) {
-    "cash" -> "Tiền mặt"
-    "card" -> "Thẻ"
-    "transfer" -> "Chuyển khoản"
-    else -> "?"
-}
-
 fun formatTime(instant: Instant): String = TIME_FORMAT.format(instant)
 
-/** "Bánh mì · 20.000đ · Ăn sáng · Tiền mặt" — used in notifications. */
-fun transactionLine(item: String, amountVnd: Long, category: String?, method: String?): String =
-    listOfNotNull(item.replaceFirstChar { it.uppercase() }, formatVnd(amountVnd), category, methodLabel(method))
-        .joinToString(" · ")
-
-/** 15.0 -> "+15%", -33.3 -> "-33,3%" (Vietnamese decimal comma). */
-fun formatPercent(pct: Double): String {
+/** 15.0 -> "+15%", -33.3 -> "-33,3%" (with ',') or "-33.3%" (with '.'). */
+fun formatPercent(pct: Double, decimalSeparator: Char): String {
     val tenths = (pct * 10).roundToLong()
     val sign = if (tenths > 0) "+" else if (tenths < 0) "-" else ""
     val whole = abs(tenths) / 10
     val frac = abs(tenths) % 10
-    return sign + whole + (if (frac != 0L) ",$frac" else "") + "%"
+    return sign + whole + (if (frac != 0L) "$decimalSeparator$frac" else "") + "%"
 }

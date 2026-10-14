@@ -1,6 +1,8 @@
 package com.sitpro.expensevoice.ui
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
+import com.sitpro.expensevoice.R
 import androidx.lifecycle.viewModelScope
 import com.sitpro.expensevoice.AppContainer
 import com.sitpro.expensevoice.api.SummaryDto
@@ -24,16 +26,25 @@ fun today(): LocalDate = LocalDate.now(VN_ZONE)
 
 fun currentMonth(): YearMonth = YearMonth.now(VN_ZONE)
 
-/** Vietnamese message for a failed server call. */
-fun errorMessage(e: Throwable): String = when {
-    e is HttpException && e.code() == 401 -> "Token không hợp lệ, kiểm tra Cài đặt"
-    e is HttpException -> "Lỗi máy chủ (${e.code()})"
-    e is IOException -> "Không kết nối được máy chủ"
-    else -> "Có lỗi xảy ra"
+/**
+ * Text to show, resolved in the UI so it follows the app language.
+ * `arg` is a String/Int format argument, or a LocalDate shown as a short date.
+ */
+data class UiMessage(@StringRes val res: Int, val arg: Any? = null, val undoTransactionId: String? = null)
+
+fun Texts.resolve(msg: UiMessage): String = when (val a = msg.arg) {
+    null -> get(msg.res)
+    is LocalDate -> get(msg.res, shortDate(a))
+    else -> get(msg.res, a)
 }
 
-/** One-off message for a Snackbar, optionally with an undo action. */
-data class UiMessage(val text: String, val undoTransactionId: String? = null)
+/** Message for a failed server call. */
+fun errorMessage(e: Throwable): UiMessage = when {
+    e is HttpException && e.code() == 401 -> UiMessage(R.string.error_token)
+    e is HttpException -> UiMessage(R.string.error_server, e.code())
+    e is IOException -> UiMessage(R.string.error_network)
+    else -> UiMessage(R.string.error_generic)
+}
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(private val container: AppContainer) : ViewModel() {
@@ -63,7 +74,7 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
             try {
                 repo.refreshDay(day.value)
             } catch (e: Exception) {
-                _messages.tryEmit(UiMessage(errorMessage(e)))
+                _messages.tryEmit(errorMessage(e))
             } finally {
                 refreshing.value = false
             }
@@ -82,10 +93,14 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
         if (patch.isEmpty()) return onDone()
         viewModelScope.launch {
             try {
-                repo.update(original.id, patch)
+                val updated = repo.update(original.id, patch)
                 onDone()
+                if (updated.day != original.day) {
+                    // It left the list being viewed; say where it went so it doesn't look lost.
+                    _messages.tryEmit(UiMessage(R.string.moved_to, LocalDate.parse(updated.day)))
+                }
             } catch (e: Exception) {
-                _messages.tryEmit(UiMessage(errorMessage(e)))
+                _messages.tryEmit(errorMessage(e))
             }
         }
     }
@@ -95,9 +110,9 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
             try {
                 repo.delete(tx.id)
                 onDone()
-                _messages.tryEmit(UiMessage("Đã xóa ${tx.item}", undoTransactionId = tx.id))
+                _messages.tryEmit(UiMessage(R.string.deleted_item, tx.item, undoTransactionId = tx.id))
             } catch (e: Exception) {
-                _messages.tryEmit(UiMessage(errorMessage(e)))
+                _messages.tryEmit(errorMessage(e))
             }
         }
     }
@@ -107,7 +122,7 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
             try {
                 repo.restore(id)
             } catch (e: Exception) {
-                _messages.tryEmit(UiMessage(errorMessage(e)))
+                _messages.tryEmit(errorMessage(e))
             }
         }
     }
@@ -121,7 +136,7 @@ class MonthViewModel(private val container: AppContainer) : ViewModel() {
     val summary: StateFlow<Pair<SummaryDto, Long>?> =
         month.flatMapLatest { repo.observeSummary(it) }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
     val refreshing = MutableStateFlow(false)
-    val error = MutableStateFlow<String?>(null)
+    val error = MutableStateFlow<UiMessage?>(null)
 
     init {
         refresh()
@@ -153,18 +168,18 @@ class MonthViewModel(private val container: AppContainer) : ViewModel() {
 class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     val pendingCount: StateFlow<Int> =
         container.db.pendingDao().countFlow().stateIn(viewModelScope, SharingStarted.Eagerly, 0)
-    val status = MutableStateFlow<String?>(null)
+    val status = MutableStateFlow<UiMessage?>(null)
 
     val initial get() = container.settings.current
 
     fun save(url: String, token: String) {
         container.settings.save(url, token)
-        status.value = "Đang kiểm tra kết nối…"
+        status.value = UiMessage(R.string.checking)
         viewModelScope.launch {
             status.value = try {
                 container.repository.refreshCategories()
                 container.resendQueue()
-                "Kết nối OK"
+                UiMessage(R.string.connection_ok)
             } catch (e: Exception) {
                 errorMessage(e)
             }
@@ -173,6 +188,6 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
 
     fun resend() {
         container.resendQueue()
-        status.value = "Đã xếp lại hàng đợi"
+        status.value = UiMessage(R.string.queue_resent)
     }
 }

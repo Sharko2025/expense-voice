@@ -33,8 +33,8 @@ class FakeResults : ResultSink {
     override fun notUnderstood(entryId: String, rawText: String?) {
         events += "not-understood:$entryId:$rawText"
     }
-    override fun rejected(entryId: String, message: String) {
-        events += "rejected:$entryId:$message"
+    override fun rejected(entryId: String, reason: Rejection) {
+        events += "rejected:$entryId:$reason"
     }
     override fun unauthorized(entryId: String) {
         events += "unauthorized:$entryId"
@@ -124,7 +124,16 @@ class UploadProcessorTest {
 
         assertEquals(UploadProcessor.Step.DONE, processor.process(entryId))
         assertFalse(file.exists())
-        assertEquals(listOf("rejected:$entryId:File ghi âm rỗng"), results.events)
+        assertEquals(listOf("rejected:$entryId:INVALID_RECORDING"), results.events)
+    }
+
+    @Test
+    fun unexpectedClientErrorIsDropped() = runTest {
+        val file = queueRecording()
+        respond(413, "too big")
+        assertEquals(UploadProcessor.Step.DONE, processor.process(entryId))
+        assertFalse(file.exists())
+        assertEquals(listOf("rejected:$entryId:SERVER_ERROR"), results.events)
     }
 
     @Test
@@ -182,7 +191,7 @@ class UploadProcessorTest {
         file.delete()
         assertEquals(UploadProcessor.Step.DONE, processor.process(entryId))
         assertNull(db.pendingDao().get(entryId))
-        assertEquals(1, results.events.size)
+        assertEquals(listOf("rejected:$entryId:MISSING_FILE"), results.events)
         assertEquals(0, server.requestCount)
     }
 

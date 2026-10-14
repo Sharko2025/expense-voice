@@ -5,6 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
+/** Language-independent formatting. Localized text is covered by TextsTest. */
 class FormatTest {
     @Test
     fun formatsVndWithDotSeparators() {
@@ -17,32 +18,10 @@ class FormatTest {
     }
 
     @Test
-    fun methodLabels() {
-        assertEquals("Tiền mặt", methodLabel("cash"))
-        assertEquals("Thẻ", methodLabel("card"))
-        assertEquals("Chuyển khoản", methodLabel("transfer"))
-        assertEquals("?", methodLabel(null))
-        assertEquals("?", methodLabel("momo"))
-    }
-
-    @Test
     fun timeIsShownInVietnamTime() {
         // 16:30 UTC = 23:30 in Ho Chi Minh City
         assertEquals("23:30", formatTime(Instant.parse("2026-10-10T16:30:00Z")))
         assertEquals("08:15", formatTime(Instant.parse("2026-10-10T08:15:00+07:00")))
-    }
-
-    @Test
-    fun notificationLineMatchesSpec() {
-        assertEquals(
-            "Bánh mì · 20.000đ · Ăn sáng · Tiền mặt",
-            transactionLine(item = "bánh mì", amountVnd = 20_000, category = "Ăn sáng", method = "cash"),
-        )
-        assertEquals(
-            "Gửi xe · 5.000đ · Gửi xe · ?",
-            transactionLine(item = "gửi xe", amountVnd = 5_000, category = "Gửi xe", method = null),
-        )
-        assertEquals("Xôi · 15.000đ · ?", transactionLine(item = "xôi", amountVnd = 15_000, category = null, method = null))
     }
 
     @Test
@@ -64,9 +43,10 @@ class FormatTest {
     }
 
     @Test
-    fun percentDiff() {
-        assertEquals("+15%", formatPercent(15.0))
-        assertEquals("-33,3%", formatPercent(-33.3))
-        assertEquals("0%", formatPercent(0.0))
+    fun percentUsesGivenDecimalSeparator() {
+        assertEquals("+15%", formatPercent(15.0, ','))
+        assertEquals("-33,3%", formatPercent(-33.3, ','))
+        assertEquals("-33.3%", formatPercent(-33.3, '.'))
+        assertEquals("0%", formatPercent(0.0, '.'))
     }
 }

@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cá Mập Ví</string>
+    <string name="record_label">Ghi chi tiêu</string>
+    <string name="widget_description">Nút ghi chi tiêu bằng giọng nói</string>
+
+    <!-- Navigation -->
+    <string name="tab_today">Hôm nay</string>
+    <string name="tab_month">Tháng này</string>
+    <string name="settings">Cài đặt</string>
+    <string name="back">Quay lại</string>
+    <string name="previous">Trước</string>
+    <string name="next">Sau</string>
+    <string name="record">Ghi âm</string>
+
+    <!-- Today -->
+    <string name="yesterday">Hôm qua</string>
+    <plurals name="transaction_count">
+        <item quantity="other">%d giao dịch</item>
+    </plurals>
+    <string name="no_transactions">Chưa có giao dịch nào</string>
+    <string name="updated_at">cập nhật lúc %s</string>
+    <string name="deleted_item">Đã xóa %s</string>
+    <string name="moved_to">Đã chuyển sang %s</string>
+    <string name="undo">Hoàn tác</string>
+
+    <!-- Edit sheet -->
+    <string name="edit_title">Sửa giao dịch</string>
+    <string name="field_item">Món</string>
+    <string name="field_amount">Số tiền (đ)</string>
+    <string name="field_category">Danh mục</string>
+    <string name="field_merchant">Nơi mua</string>
+    <string name="field_date">Ngày</string>
+    <string name="field_time">Giờ</string>
+    <string name="delete">Xóa</string>
+    <string name="save">Lưu</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Hủy</string>
+    <string name="error_item_required">Nhập tên món</string>
+    <string name="error_amount_invalid">Số tiền không hợp lệ</string>
+    <string name="error_future">Không chọn thời điểm ở tương lai</string>
+
+    <!-- Payment methods -->
+    <string name="method_cash">Tiền mặt</string>
+    <string name="method_card">Thẻ</string>
+    <string name="method_transfer">Chuyển khoản</string>
+    <string name="method_transfer_short">C.khoản</string>
+    <string name="method_unset">Chưa rõ</string>
+
+    <!-- Categories -->
+    <string name="cat_breakfast">Ăn sáng</string>
+    <string name="cat_lunch">Ăn trưa</string>
+    <string name="cat_dinner">Ăn tối</string>
+    <string name="cat_coffee">Cafe/Đồ uống</string>
+    <string name="cat_parking">Gửi xe</string>
+    <string name="cat_transport">Xăng/Di chuyển</string>
+    <string name="cat_groceries">Đi chợ/Siêu thị</string>
+    <string name="cat_shopping">Mua sắm</string>
+    <string name="cat_bills">Hóa đơn</string>
+    <string name="cat_entertainment">Giải trí</string>
+    <string name="cat_health">Sức khỏe</string>
+    <string name="cat_other">Khác</string>
+
+    <!-- Month -->
+    <string name="no_spending_month">Chưa có chi tiêu trong tháng</string>
+    <string name="diff_same">Bằng tháng trước</string>
+    <string name="diff_vs_last">%s so với tháng trước</string>
+
+    <!-- Date patterns (java.time) -->
+    <string name="pattern_day_title">EEEE, dd/MM</string>
+    <string name="pattern_short_date">dd/MM</string>
+    <string name="pattern_month_title">\'Tháng\' M/yyyy</string>
+    <string name="pattern_updated">HH:mm dd/MM</string>
+    <string name="decimal_separator">,</string>
+
+    <!-- Settings -->
+    <string name="settings_url">URL máy chủ</string>
+    <string name="settings_token">Device token</string>
+    <string name="show">Hiện</string>
+    <string name="hide">Ẩn</string>
+    <string name="save_and_check">Lưu và kiểm tra</string>
+    <string name="checking">Đang kiểm tra kết nối…</string>
+    <string name="connection_ok">Kết nối OK</string>
+    <string name="pending_count">Đang chờ gửi: %d</string>
+    <string name="resend_queue">Gửi lại hàng đợi</string>
+    <string name="queue_resent">Đã xếp lại hàng đợi</string>
+
+    <!-- Errors -->
+    <string name="error_token">Token không hợp lệ, kiểm tra Cài đặt</string>
+    <string name="error_server">Lỗi máy chủ (%d)</string>
+    <string name="error_network">Không kết nối được máy chủ</string>
+    <string name="error_generic">Có lỗi xảy ra</string>
+
+    <!-- Recording -->
+    <string name="speak_now">Nói đi…</string>
+    <string name="listening">Đang nghe…</string>
+    <string name="stop">Dừng</string>
+    <string name="need_mic">Cấp quyền micro trước nhé</string>
+    <string name="mic_failed">Không mở được micro</string>
+    <string name="no_speech">Không nghe thấy gì</string>
+    <string name="too_short">Bản ghi quá ngắn, nói lại nhé</string>
+
+    <!-- Notifications -->
+    <string name="channel_result">Kết quả ghi chi tiêu</string>
+    <string name="channel_sending">Đang gửi</string>
+    <string name="notif_sending">⏳ Đang gửi…</string>
+    <string name="notif_offline">Đã lưu, sẽ gửi khi có mạng</string>
+    <string name="notif_many">✓ %1$d giao dịch · %2$s</string>
+    <string name="notif_not_understood">Không hiểu, nói lại nhé</string>
+    <string name="notif_heard">Nghe được: “%s”</string>
+    <string name="notif_missing_file">Mất file ghi âm, nói lại nhé</string>
+    <string name="notif_invalid_recording">Không gửi được bản ghi âm</string>
+    <string name="notif_token_title">Token không hợp lệ</string>
+    <string name="notif_token_text">Mở Cài đặt để nhập lại token, bản ghi vẫn được giữ</string>
+    <string name="notif_undone">Đã hoàn tác</string>
+    <string name="notif_undoing">Đang hoàn tác…</string>
+</resources>

@@ -49,6 +49,9 @@ import com.sitpro.expensevoice.ui.SettingsScreen
 import com.sitpro.expensevoice.ui.SettingsViewModel
 import com.sitpro.expensevoice.ui.TodayScreen
 import com.sitpro.expensevoice.ui.TodayViewModel
+import com.sitpro.expensevoice.ui.rememberTexts
+import com.sitpro.expensevoice.ui.resolve
+import androidx.compose.ui.res.stringResource
 
 private enum class Tab { TODAY, MONTH, SETTINGS }
 
@@ -75,11 +78,12 @@ class MainActivity : ComponentActivity() {
                 var tab by rememberSaveable { mutableStateOf(if (c.settings.current.isConfigured) Tab.TODAY else Tab.SETTINGS) }
                 val snackbar = remember { SnackbarHostState() }
 
-                LaunchedEffect(Unit) {
+                val texts = rememberTexts()
+                LaunchedEffect(texts) {
                     todayVm.messages.collect { msg ->
                         val result = snackbar.showSnackbar(
-                            msg.text,
-                            actionLabel = msg.undoTransactionId?.let { "Hoàn tác" },
+                            texts.resolve(msg),
+                            actionLabel = msg.undoTransactionId?.let { texts.get(R.string.undo) },
                             duration = SnackbarDuration.Short,
                         )
                         if (result == SnackbarResult.ActionPerformed) msg.undoTransactionId?.let(todayVm::restore)
@@ -124,15 +128,15 @@ private fun MainScaffold(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (tab == Tab.SETTINGS) "Cài đặt" else "Chi tiêu") },
+                title = { Text(stringResource(if (tab == Tab.SETTINGS) R.string.settings else R.string.app_name)) },
                 navigationIcon = {
                     if (tab == Tab.SETTINGS) {
-                        IconButton(onClick = { onTab(Tab.TODAY) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Quay lại") }
+                        IconButton(onClick = { onTab(Tab.TODAY) }) { Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back)) }
                     }
                 },
                 actions = {
                     if (tab != Tab.SETTINGS) {
-                        IconButton(onClick = { onTab(Tab.SETTINGS) }) { Icon(Icons.Filled.Settings, "Cài đặt") }
+                        IconButton(onClick = { onTab(Tab.SETTINGS) }) { Icon(Icons.Filled.Settings, stringResource(R.string.settings)) }
                     }
                 },
             )
@@ -140,8 +144,8 @@ private fun MainScaffold(
         bottomBar = {
             if (tab != Tab.SETTINGS) {
                 NavigationBar {
-                    NavigationBarItem(tab == Tab.TODAY, { onTab(Tab.TODAY) }, { Icon(Icons.Filled.Today, null) }, label = { Text("Hôm nay") })
-                    NavigationBarItem(tab == Tab.MONTH, { onTab(Tab.MONTH) }, { Icon(Icons.Filled.CalendarMonth, null) }, label = { Text("Tháng này") })
+                    NavigationBarItem(tab == Tab.TODAY, { onTab(Tab.TODAY) }, { Icon(Icons.Filled.Today, null) }, label = { Text(stringResource(R.string.tab_today)) })
+                    NavigationBarItem(tab == Tab.MONTH, { onTab(Tab.MONTH) }, { Icon(Icons.Filled.CalendarMonth, null) }, label = { Text(stringResource(R.string.tab_month)) })
                 }
             }
         },
@@ -152,7 +156,7 @@ private fun MainScaffold(
                     onClick = onRecord,
                     modifier = Modifier.size(80.dp),
                     shape = CircleShape,
-                ) { Icon(Icons.Filled.Mic, "Ghi âm", Modifier.size(40.dp)) }
+                ) { Icon(Icons.Filled.Mic, stringResource(R.string.record), Modifier.size(40.dp)) }
             }
         },
         floatingActionButtonPosition = FabPosition.Center,

@@ -1,9 +1,12 @@
 package com.sitpro.expensevoice.ui
 
+import com.sitpro.expensevoice.R
 import com.sitpro.expensevoice.api.CategoryTotalDto
 import com.sitpro.expensevoice.api.SummaryDto
 import com.sitpro.expensevoice.data.CachedTransaction
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -12,10 +15,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ScreenLogicTest {
+    // 2026-10-11 08:15:42 in Vietnam
+    private val originalInstant = Instant.parse("2026-10-11T01:15:42Z")
     private val original = CachedTransaction(
-        id = "t1", voiceEntryId = "e1", occurredAtMillis = 0, day = "2026-10-11", item = "bánh mì",
-        amountVnd = 20_000, categoryId = 1, category = "Ăn sáng", method = "cash", merchant = null,
+        id = "t1", voiceEntryId = "e1", occurredAtMillis = originalInstant.toEpochMilli(), day = "2026-10-11",
+        item = "bánh mì", amountVnd = 20_000, categoryId = 1, category = "Ăn sáng", method = "cash", merchant = null,
     )
+    private val now = Instant.parse("2026-10-15T05:00:00Z") // 12:00 in Vietnam
 
     private fun edit(
         item: String = "bánh mì",
@@ -23,11 +29,22 @@ class ScreenLogicTest {
         categoryId: Int? = 1,
         method: String? = "cash",
         merchant: String = "",
-    ) = TransactionEdit(item, amount, categoryId, method, merchant)
+        date: LocalDate = LocalDate.of(2026, 10, 11),
+        time: LocalTime = LocalTime.of(8, 15),
+    ) = TransactionEdit(item, amount, categoryId, method, merchant, date, time)
+
+    @Test
+    fun fromTransactionUsesVietnamTime() {
+        val e = TransactionEdit.from(original)
+        assertEquals(LocalDate.of(2026, 10, 11), e.date)
+        assertEquals(LocalTime.of(8, 15), e.time)
+        assertEquals("20.000", e.amount)
+    }
 
     @Test
     fun unchangedEditProducesEmptyPatch() {
         assertEquals("{}", buildPatch(original, edit()).toString())
+        assertEquals("{}", buildPatch(original, TransactionEdit.from(original)).toString())
     }
 
     @Test
@@ -47,11 +64,39 @@ class ScreenLogicTest {
     }
 
     @Test
+    fun changedTimeIsSentWithVietnamOffset() {
+        assertEquals(
+            """{"occurred_at":"2026-10-11T12:30:00+07:00"}""",
+            buildPatch(original, edit(time = LocalTime.of(12, 30))).toString(),
+        )
+    }
+
+    @Test
+    fun changedDateIsSent() {
+        assertEquals(
+            """{"occurred_at":"2026-10-10T23:30:00+07:00"}""",
+            buildPatch(original, edit(date = LocalDate.of(2026, 10, 10), time = LocalTime.of(23, 30))).toString(),
+        )
+    }
+
+    @Test
+    fun combinesVietnamDateAndTime() {
+        assertEquals(
+            Instant.parse("2026-10-11T16:30:00Z"),
+            vnInstant(LocalDate.of(2026, 10, 11), LocalTime.of(23, 30)),
+        )
+    }
+
+    @Test
     fun validation() {
-        assertNull(edit().error())
-        assertEquals("Nhập tên món", edit(item = "  ").error())
-        assertEquals("Số tiền không hợp lệ", edit(amount = "0").error())
-        assertEquals("Số tiền không hợp lệ", edit(amount = "20k").error())
+        assertNull(edit().error(now))
+        assertEquals(R.string.error_item_required, edit(item = "  ").error(now))
+        assertEquals(R.string.error_amount_invalid, edit(amount = "0").error(now))
+        assertEquals(R.string.error_amount_invalid, edit(amount = "20k").error(now))
+        // now = 12:00 on 15/10 in Vietnam
+        assertNull(edit(date = LocalDate.of(2026, 10, 15), time = LocalTime.of(12, 0)).error(now))
+        assertEquals(R.string.error_future, edit(date = LocalDate.of(2026, 10, 15), time = LocalTime.of(12, 1)).error(now))
+        assertEquals(R.string.error_future, edit(date = LocalDate.of(2026, 10, 16)).error(now))
     }
 
     @Test
@@ -64,36 +109,12 @@ class ScreenLogicTest {
     }
 
     @Test
-    fun dayTitle() {
-        val today = LocalDate.of(2026, 10, 11)
-        assertEquals("Hôm nay", dayTitle(today, today))
-        assertEquals("Hôm qua", dayTitle(today.minusDays(1), today))
-        assertEquals("Thứ Năm, 08/10", dayTitle(LocalDate.of(2026, 10, 8), today))
-        assertEquals("Chủ Nhật, 04/10", dayTitle(LocalDate.of(2026, 10, 4), today))
-    }
-
-    @Test
-    fun monthTitle() {
-        assertEquals("Tháng 10/2026", monthTitle(YearMonth.of(2026, 10)))
-    }
-
-    private fun summary(diffVnd: Long, diffPct: Double?, vararg totals: Long) = SummaryDto(
-        month = "2026-10", totalVnd = totals.sum(), count = totals.size, prevMonth = "2026-09",
-        prevTotalVnd = totals.sum() - diffVnd, diffVnd = diffVnd, diffPct = diffPct,
-        byCategory = totals.mapIndexed { i, t -> CategoryTotalDto(i, "c$i", t, 1) },
-    )
-
-    @Test
     fun barsAreRelativeToTheLargestCategory() {
-        val bars = categoryBars(summary(0, null, 1_200_000, 300_000, 0))
-        assertEquals(listOf(1f, 0.25f, 0f), bars.map { it.fraction })
-    }
-
-    @Test
-    fun diffText() {
-        assertEquals("+450.000đ (+15%) so với tháng trước", diffText(summary(450_000, 15.0, 1)))
-        assertEquals("-100.000đ (-33,3%) so với tháng trước", diffText(summary(-100_000, -33.3, 1)))
-        assertEquals("+50.000đ so với tháng trước", diffText(summary(50_000, null, 1)))
-        assertEquals("Bằng tháng trước", diffText(summary(0, 0.0, 1)))
+        val s = SummaryDto(
+            month = "2026-10", totalVnd = 1_500_000, count = 3, prevMonth = "2026-09", prevTotalVnd = 0,
+            diffVnd = 0, diffPct = null,
+            byCategory = listOf(1_200_000L, 300_000L, 0L).mapIndexed { i, t -> CategoryTotalDto(i, "c$i", t, 1) },
+        )
+        assertEquals(listOf(1f, 0.25f, 0f), categoryBars(s).map { it.fraction })
     }
 }

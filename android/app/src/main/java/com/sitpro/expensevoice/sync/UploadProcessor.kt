@@ -13,11 +13,14 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
+/** Why a recording was dropped. The app shows its own text for each (server messages are Vietnamese only). */
+enum class Rejection { MISSING_FILE, INVALID_RECORDING, SERVER_ERROR }
+
 /** Where upload/undo outcomes are reported (notifications in the app, a fake in tests). */
 interface ResultSink {
     fun success(entryId: String, transactions: List<TransactionDto>)
     fun notUnderstood(entryId: String, rawText: String?)
-    fun rejected(entryId: String, message: String)
+    fun rejected(entryId: String, reason: Rejection)
     fun unauthorized(entryId: String)
     fun undone(entryId: String)
 }
@@ -36,7 +39,7 @@ class UploadProcessor(
         val file = File(row.filePath)
         if (!file.exists()) {
             pending.delete(entryId)
-            results.rejected(entryId, "Mất file ghi âm, nói lại nhé")
+            results.rejected(entryId, Rejection.MISSING_FILE)
             return Step.DONE
         }
 
@@ -73,7 +76,7 @@ class UploadProcessor(
                 val err = parseError(resp.errorBody()?.string())
                 finish(entryId, file)
                 if (err.rawText != null) results.notUnderstood(entryId, err.rawText)
-                else results.rejected(entryId, err.message ?: "Không gửi được bản ghi âm")
+                else results.rejected(entryId, Rejection.INVALID_RECORDING)
                 Step.DONE
             }
             code == 409 || code == 408 || code == 429 || code >= 500 -> {
@@ -82,7 +85,7 @@ class UploadProcessor(
             }
             else -> {
                 finish(entryId, file)
-                results.rejected(entryId, parseError(resp.errorBody()?.string()).message ?: "Lỗi máy chủ ($code)")
+                results.rejected(entryId, Rejection.SERVER_ERROR)
                 Step.DONE
             }
         }

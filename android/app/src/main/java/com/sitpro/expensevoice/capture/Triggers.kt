@@ -31,7 +31,7 @@ class VoiceTileService : TileService() {
     override fun onStartListening() {
         qsTile?.apply {
             state = Tile.STATE_INACTIVE
-            label = "Ghi chi tiêu"
+            label = getString(R.string.record_label)
             updateTile()
         }
     }
@@ -55,7 +55,7 @@ class QuickWidget : GlanceAppWidget() {
             ) {
                 Image(
                     provider = ImageProvider(R.drawable.ic_stat_mic),
-                    contentDescription = "Ghi chi tiêu",
+                    contentDescription = context.getString(R.string.record_label),
                     colorFilter = ColorFilter.tint(ColorProvider(Color.White)),
                     modifier = GlanceModifier.size(36.dp),
                 )

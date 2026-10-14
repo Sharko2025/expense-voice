@@ -13,50 +13,55 @@ import com.sitpro.expensevoice.MainActivity
 import com.sitpro.expensevoice.R
 import com.sitpro.expensevoice.api.TransactionDto
 import com.sitpro.expensevoice.container
+import com.sitpro.expensevoice.sync.Rejection
 import com.sitpro.expensevoice.sync.ResultSink
+import com.sitpro.expensevoice.ui.Texts
 import com.sitpro.expensevoice.ui.formatVnd
-import com.sitpro.expensevoice.ui.transactionLine
 
 /** Text for the result notification; kept separate so it can be unit-tested. */
 data class ResultText(val title: String, val lines: List<String>)
 
-fun resultText(transactions: List<TransactionDto>): ResultText {
-    val lines = transactions.map { transactionLine(it.item, it.amountVnd, it.category, it.method) }
+fun resultText(texts: Texts, transactions: List<TransactionDto>): ResultText {
+    val lines = transactions.map { texts.line(it.item, it.amountVnd, it.category, it.method) }
     return if (transactions.size == 1) {
         ResultText("✓ " + lines.single(), emptyList())
     } else {
-        ResultText("✓ ${transactions.size} giao dịch · ${formatVnd(transactions.sumOf { it.amountVnd })}", lines)
+        ResultText(texts.get(R.string.notif_many, transactions.size, formatVnd(transactions.sumOf { it.amountVnd })), lines)
     }
 }
 
 class ResultNotifier(private val context: Context) : ResultSink {
     private val manager = NotificationManagerCompat.from(context)
 
+    /** Read fresh each time so a change of app language is picked up. */
+    private val texts get() = Texts(context.resources)
+    private fun str(id: Int, vararg args: Any) = context.getString(id, *args)
+
     fun createChannels() {
         val nm = context.getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
-            NotificationChannel(CHANNEL_RESULT, "Kết quả ghi chi tiêu", NotificationManager.IMPORTANCE_HIGH).apply {
+            NotificationChannel(CHANNEL_RESULT, str(R.string.channel_result), NotificationManager.IMPORTANCE_HIGH).apply {
                 setSound(null, null) // pops up, but silently
             }
         )
         nm.createNotificationChannel(
-            NotificationChannel(CHANNEL_SENDING, "Đang gửi", NotificationManager.IMPORTANCE_LOW)
+            NotificationChannel(CHANNEL_SENDING, str(R.string.channel_sending), NotificationManager.IMPORTANCE_LOW)
         )
     }
 
     fun sending(entryId: String, online: Boolean) = post(
         entryId,
         base(CHANNEL_SENDING)
-            .setContentTitle(if (online) "⏳ Đang gửi…" else "Đã lưu, sẽ gửi khi có mạng")
+            .setContentTitle(str(if (online) R.string.notif_sending else R.string.notif_offline))
             .setOngoing(online)
             .setSilent(true),
     )
 
     override fun success(entryId: String, transactions: List<TransactionDto>) {
-        val text = resultText(transactions)
+        val text = resultText(texts, transactions)
         val builder = base(CHANNEL_RESULT)
             .setContentTitle(text.title)
-            .addAction(0, "Hoàn tác", undoIntent(entryId))
+            .addAction(0, str(R.string.undo), undoIntent(entryId))
         if (text.lines.isNotEmpty()) {
             builder.setStyle(NotificationCompat.InboxStyle().also { style -> text.lines.forEach(style::addLine) })
             builder.setContentText(text.lines.first())
@@ -64,31 +69,39 @@ class ResultNotifier(private val context: Context) : ResultSink {
         post(entryId, builder)
     }
 
-    override fun notUnderstood(entryId: String, rawText: String?) = post(
-        entryId,
-        base(CHANNEL_RESULT)
-            .setContentTitle("Không hiểu, nói lại nhé")
-            .setContentText(rawText?.let { "Nghe được: “$it”" })
-            .setStyle(NotificationCompat.BigTextStyle().bigText(rawText?.let { "Nghe được: “$it”" })),
-    )
+    override fun notUnderstood(entryId: String, rawText: String?) {
+        val heard = rawText?.let { str(R.string.notif_heard, it) }
+        post(
+            entryId,
+            base(CHANNEL_RESULT)
+                .setContentTitle(str(R.string.notif_not_understood))
+                .setContentText(heard)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(heard)),
+        )
+    }
 
-    override fun rejected(entryId: String, message: String) =
-        post(entryId, base(CHANNEL_RESULT).setContentTitle(message))
+    override fun rejected(entryId: String, reason: Rejection) {
+        val title = when (reason) {
+            Rejection.MISSING_FILE -> R.string.notif_missing_file
+            Rejection.INVALID_RECORDING, Rejection.SERVER_ERROR -> R.string.notif_invalid_recording
+        }
+        post(entryId, base(CHANNEL_RESULT).setContentTitle(str(title)))
+    }
 
     override fun unauthorized(entryId: String) = post(
         entryId,
         base(CHANNEL_RESULT)
-            .setContentTitle("Token không hợp lệ")
-            .setContentText("Mở Cài đặt để nhập lại token, bản ghi vẫn được giữ"),
+            .setContentTitle(str(R.string.notif_token_title))
+            .setContentText(str(R.string.notif_token_text)),
     )
 
     override fun undone(entryId: String) = post(
         entryId,
-        base(CHANNEL_RESULT).setContentTitle("Đã hoàn tác").setTimeoutAfter(4_000).setSilent(true),
+        base(CHANNEL_RESULT).setContentTitle(str(R.string.notif_undone)).setTimeoutAfter(4_000).setSilent(true),
     )
 
     fun undoing(entryId: String) =
-        post(entryId, base(CHANNEL_SENDING).setContentTitle("Đang hoàn tác…").setSilent(true))
+        post(entryId, base(CHANNEL_SENDING).setContentTitle(str(R.string.notif_undoing)).setSilent(true))
 
     private fun base(channel: String) = NotificationCompat.Builder(context, channel)
         .setSmallIcon(R.drawable.ic_stat_mic)

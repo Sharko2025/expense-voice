@@ -1,37 +1,55 @@
 package com.sitpro.expensevoice.ui
 
+import androidx.annotation.StringRes
+import com.sitpro.expensevoice.R
 import com.sitpro.expensevoice.api.SummaryDto
 import com.sitpro.expensevoice.data.CachedTransaction
-import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 
-/** What the edit sheet holds; strings are exactly what the user typed. */
+fun vnInstant(date: LocalDate, time: LocalTime): Instant = date.atTime(time).atZone(VN_ZONE).toInstant()
+
+/** What the edit sheet holds; strings are exactly what the user typed. Date and time are Vietnam time. */
 data class TransactionEdit(
     val item: String,
     val amount: String,
     val categoryId: Int?,
     val method: String?,
     val merchant: String,
+    val date: LocalDate,
+    val time: LocalTime,
 ) {
-    fun error(): String? = when {
-        item.isBlank() -> "Nhập tên món"
-        parseAmountInput(amount) == null -> "Số tiền không hợp lệ"
+    val occurredAt: Instant get() = vnInstant(date, time)
+
+    @StringRes
+    fun error(now: Instant = Instant.now()): Int? = when {
+        item.isBlank() -> R.string.error_item_required
+        parseAmountInput(amount) == null -> R.string.error_amount_invalid
+        occurredAt > now -> R.string.error_future
         else -> null
     }
 
     companion object {
-        fun from(tx: CachedTransaction) = TransactionEdit(
-            item = tx.item,
-            amount = formatAmountInput(tx.amountVnd),
-            categoryId = tx.categoryId,
-            method = tx.method,
-            merchant = tx.merchant.orEmpty(),
-        )
+        fun from(tx: CachedTransaction): TransactionEdit {
+            val local = Instant.ofEpochMilli(tx.occurredAtMillis).atZone(VN_ZONE)
+            return TransactionEdit(
+                item = tx.item,
+                amount = formatAmountInput(tx.amountVnd),
+                categoryId = tx.categoryId,
+                method = tx.method,
+                merchant = tx.merchant.orEmpty(),
+                date = local.toLocalDate(),
+                time = local.toLocalTime().truncatedTo(ChronoUnit.MINUTES),
+            )
+        }
     }
 }
 
@@ -45,39 +63,24 @@ fun buildPatch(original: CachedTransaction, edit: TransactionEdit): JsonObject =
     if (edit.method != original.method) put("method", edit.method?.let(::JsonPrimitive) ?: JsonNull)
     val merchant = edit.merchant.trim().ifEmpty { null }
     if (merchant != original.merchant) put("merchant", merchant?.let(::JsonPrimitive) ?: JsonNull)
+    // The sheet edits to the minute, so seconds of the original don't count as a change.
+    val originalMinute = Instant.ofEpochMilli(original.occurredAtMillis).truncatedTo(ChronoUnit.MINUTES)
+    if (edit.occurredAt != originalMinute) {
+        put("occurred_at", JsonPrimitive(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(edit.occurredAt.atZone(VN_ZONE))))
+    }
 }
 
 fun canGoForward(day: LocalDate, today: LocalDate) = day < today
 
 fun canGoForward(month: YearMonth, current: YearMonth) = month < current
 
-private val WEEKDAYS = mapOf(
-    DayOfWeek.MONDAY to "Thứ Hai", DayOfWeek.TUESDAY to "Thứ Ba", DayOfWeek.WEDNESDAY to "Thứ Tư",
-    DayOfWeek.THURSDAY to "Thứ Năm", DayOfWeek.FRIDAY to "Thứ Sáu", DayOfWeek.SATURDAY to "Thứ Bảy",
-    DayOfWeek.SUNDAY to "Chủ Nhật",
-)
-
-fun dayTitle(day: LocalDate, today: LocalDate): String = when (day) {
-    today -> "Hôm nay"
-    today.minusDays(1) -> "Hôm qua"
-    else -> "%s, %02d/%02d".format(WEEKDAYS.getValue(day.dayOfWeek), day.dayOfMonth, day.monthValue)
-}
-
-fun monthTitle(month: YearMonth) = "Tháng ${month.monthValue}/${month.year}"
-
-data class CategoryBar(val name: String, val totalVnd: Long, val count: Int, val fraction: Float)
+/** `name` is the server (Vietnamese) category name; translate with Texts.category when showing it. */
+data class CategoryBar(val name: String?, val totalVnd: Long, val count: Int, val fraction: Float)
 
 /** Bars are relative to the biggest category so the top one fills the row. */
 fun categoryBars(summary: SummaryDto): List<CategoryBar> {
     val max = summary.byCategory.maxOfOrNull { it.totalVnd } ?: 0L
     return summary.byCategory.map {
-        CategoryBar(it.category ?: "Khác", it.totalVnd, it.count, if (max > 0) it.totalVnd.toFloat() / max else 0f)
+        CategoryBar(it.category, it.totalVnd, it.count, if (max > 0) it.totalVnd.toFloat() / max else 0f)
     }
-}
-
-fun diffText(summary: SummaryDto): String {
-    if (summary.diffVnd == 0L) return "Bằng tháng trước"
-    val sign = if (summary.diffVnd > 0) "+" else ""
-    val pct = summary.diffPct?.let { " (${formatPercent(it)})" }.orEmpty()
-    return "$sign${formatVnd(summary.diffVnd)}$pct so với tháng trước"
 }

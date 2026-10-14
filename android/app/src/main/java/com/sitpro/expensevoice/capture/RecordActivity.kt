@@ -43,6 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.sitpro.expensevoice.MainActivity
+import com.sitpro.expensevoice.R
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
 import com.sitpro.expensevoice.audio.Recorder
 import com.sitpro.expensevoice.audio.SilenceDetector
 import com.sitpro.expensevoice.container
@@ -83,7 +86,7 @@ class RecordActivity : ComponentActivity() {
 
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             startActivity(Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-            toast("Cấp quyền micro trước nhé")
+            toast(R.string.need_mic)
             done = true
             finish()
             return
@@ -109,7 +112,7 @@ class RecordActivity : ComponentActivity() {
             recorder.start(file)
         } catch (e: Exception) {
             file.delete()
-            toast("Không mở được micro")
+            toast(R.string.mic_failed)
             done = true
             finish()
             return
@@ -126,7 +129,7 @@ class RecordActivity : ComponentActivity() {
                 when (decision) {
                     SilenceDetector.Decision.STOP -> finishRecording(save = true)
                     SilenceDetector.Decision.CANCEL_NO_SPEECH -> {
-                        toast("Không nghe thấy gì")
+                        toast(R.string.no_speech)
                         finishRecording(save = false)
                     }
                     SilenceDetector.Decision.CONTINUE -> Unit
@@ -155,7 +158,7 @@ class RecordActivity : ComponentActivity() {
             container.submitRecording(entryId, file, recordedAt)
         } else {
             file.delete()
-            if (save) toast("Bản ghi quá ngắn, nói lại nhé")
+            if (save) toast(R.string.too_short)
         }
         finish()
     }
@@ -165,7 +168,7 @@ class RecordActivity : ComponentActivity() {
             ?.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
     }
 
-    private fun toast(text: String) = Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+    private fun toast(@StringRes text: Int) = Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
 }
 
 @androidx.compose.runtime.Composable
@@ -190,7 +193,7 @@ private fun RecordingCard(
                     Icon(Icons.Filled.Mic, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(44.dp))
                 }
                 Spacer(Modifier.height(20.dp))
-                Text(if (heardSpeech) "Đang nghe…" else "Nói đi…", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(if (heardSpeech) R.string.listening else R.string.speak_now), style = MaterialTheme.typography.titleLarge)
                 Text(
                     "%d:%02d".format(elapsedMs / 60_000, elapsedMs / 1000 % 60),
                     style = MaterialTheme.typography.bodyMedium,
@@ -198,9 +201,9 @@ private fun RecordingCard(
                 )
                 Spacer(Modifier.height(20.dp))
                 Row(horizontalArrangement = Arrangement.Center) {
-                    OutlinedButton(onClick = onCancel) { Text("Hủy") }
+                    OutlinedButton(onClick = onCancel) { Text(stringResource(R.string.cancel)) }
                     Spacer(Modifier.width(16.dp))
-                    Button(onClick = onStop) { Text("Dừng") }
+                    Button(onClick = onStop) { Text(stringResource(R.string.stop)) }
                 }
             }
         }
