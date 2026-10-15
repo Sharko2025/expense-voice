@@ -206,7 +206,7 @@ JSON Schema (strict):
 
 App có 2 phần: luồng ghi âm (chạy được từ màn hình khóa, không cần mở giao diện chính) và 2 màn hình xem đơn giản.
 
-**Tên và ngôn ngữ** (bổ sung 2026-10-14): tên app **Ví Cá Mập** / **Sharko Wallet** (đổi 2026-10-15). Giao diện song ngữ, **mặc định tiếng Việt** khi mở app lần đầu (kể cả máy để English); nút **VI / EN** trên thanh trên cùng để đổi ngay, đồng bộ với Settings → Apps → Language của Android (đổi 2026-10-15). Danh mục lưu tiếng Việt trên server, app dịch khi hiển thị. Tiền luôn hiển thị dạng `20.000đ`.
+**Tên và ngôn ngữ** (bổ sung 2026-10-14): tên app **Ví Cá Mập** / **Sharko Wallet** (đổi 2026-10-15); tên dưới icon trên launcher luôn là **Ví Cá Mập**, icon ghi âm là **Record** / **Ghi âm**; logo vây cá mập (phương án 7). Giao diện song ngữ, **mặc định tiếng Việt** khi mở app lần đầu (kể cả máy để English); nút **VI / EN** trên thanh trên cùng để đổi ngay, đồng bộ với Settings → Apps → Language của Android (đổi 2026-10-15). Danh mục lưu tiếng Việt trên server, app dịch khi hiển thị. Tiền luôn hiển thị dạng `20.000đ`.
 
 **Cấu trúc project**
 

@@ -3,6 +3,9 @@
 <resources>
     <string name="app_name">Sharko Wallet</string>
     <string name="record_label">Record expense</string>
+    <!-- Name under the launcher icon: always Vietnamese (Loi, 2026-10-15); the in-app title follows the app language. -->
+    <string name="launcher_name">Ví Cá Mập</string>
+    <string name="record_launcher_label">Record</string>
     <string name="widget_description">One-tap voice expense button</string>
 
     <!-- Navigation -->

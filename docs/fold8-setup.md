@@ -1,6 +1,6 @@
 # Hướng dẫn cài đặt trên Galaxy Z Fold 8
 
-App: **Sharko Wallet** (English) / **Ví Cá Mập** (tiếng Việt).
+App: tên dưới icon luôn là **Ví Cá Mập**; trong app hiện **Ví Cá Mập** (tiếng Việt) hoặc **Sharko Wallet** (English) theo nút 🌐 VI / EN.
 
 Máy: SM-F971B · Android 17 · One UI 9 · **giao diện tiếng Anh** (tên menu bên dưới giữ nguyên tiếng Anh).
 
@@ -52,19 +52,19 @@ cd android
 Bản dùng thật (APK đã ký, Phase 4): xem SPEC mục "Build và cài lên Fold 8". Khi cài APK ngoài Store: tạm tắt **Settings → Security and privacy → Auto Blocker**, cài xong bật lại.
 
 Sau khi cài, app có **2 icon** (tên theo ngôn ngữ của app: English / tiếng Việt):
-- **Sharko Wallet** / **Ví Cá Mập**: màn hình Hôm nay / Tháng này / Cài đặt.
-- **Record expense** / **Ghi chi tiêu**: mở là ghi âm ngay.
+- **Ví Cá Mập** (icon vây cá mập): màn hình Hôm nay / Tháng này / Cài đặt.
+- **Record** / **Ghi âm** (icon micro nền cam): mở là ghi âm ngay.
 
 ## 4. Mở app lần đầu
 
-1. Mở **Sharko Wallet** → cho phép **Microphone** và **Notifications**.
+1. Mở **Ví Cá Mập** → cho phép **Microphone** và **Notifications**.
 2. Màn **Cài đặt** hiện ra: URL máy chủ đã điền sẵn `https://expense-voice.s-itpro.com`; nhập **Device token**.
    - Lấy token trên server: `grep DEVICE_TOKEN ~/expense-voice/.env` (Claude Code có thể nhập hộ qua adb).
 3. Bấm **Lưu và kiểm tra** → phải thấy **Kết nối OK**.
 
 ## 5. Nhấn đúp nút nguồn để ghi âm
 
-**Settings → Advanced features → Side button → Double press** → bật → **Open app** → chọn **Record expense** (hoặc **Ghi chi tiêu** khi app đang ở tiếng Việt).
+**Settings → Advanced features → Side button → Double press** → bật → **Open app** → chọn **Record** (hoặc **Ghi âm** khi máy để tiếng Việt).
 
 Danh sách của Samsung chỉ hiện 1 dòng mỗi app, đó là màn ghi âm; nhấn đúp nút nguồn mở thẳng **màn ghi âm**, kể cả khi đang khóa màn hình (đã thử 2026-10-15).
 
@@ -79,19 +79,19 @@ Danh sách của Samsung chỉ hiện 1 dòng mỗi app, đó là màn ghi âm; 
 
 **Màn hình chính (máy mở):**
 1. Giữ tay vào chỗ trống trên màn hình chính → **Widgets**.
-2. Tìm **Sharko Wallet** → chọn widget **Record expense** (nút micro tròn) → **Add**.
+2. Tìm **Ví Cá Mập** → chọn widget **Record expense** / **Ghi chi tiêu** (nút micro tròn) → **Add**.
 
 **Màn hình ngoài (máy gập):** gập máy, làm lại 2 bước trên trên màn hình ngoài.
 
 ## 8. Pin: để hàng đợi offline gửi đúng lúc
 
-**Settings → Apps → Sharko Wallet → Battery → Unrestricted**.
+**Settings → Apps → Ví Cá Mập → Battery → Unrestricted**.
 
 Không đặt Unrestricted, Samsung có thể hoãn việc gửi lại các bản ghi lúc mất mạng.
 
 ## 8b. Đổi ngôn ngữ của app
 
-**Settings → Apps → Sharko Wallet → Language** → English hoặc Tiếng Việt (không cần đổi ngôn ngữ cả máy).
+Bấm nút **🌐 VI / EN** trên thanh trên cùng của app, hoặc **Settings → Apps → Ví Cá Mập → Language**. Mặc định: tiếng Việt.
 
 ## 9. Cách dùng hằng ngày
 

@@ -11,18 +11,18 @@
         android:name=".ExpenseApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/launcher_name"
         android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExpenseVoice">
 
-        <!-- Icon "Record expense": records immediately. Declared FIRST on purpose: Samsung's side-key
+        <!-- Icon "Record" / "Ghi âm": records immediately. Declared FIRST on purpose: Samsung's side-key
              "Open app" lists one entry per app and launches its first launcher activity.
              configChanges: folding/unfolding must not restart the activity mid-recording. -->
         <activity
             android:name=".capture.RecordActivity"
             android:exported="true"
-            android:label="@string/record_label"
+            android:label="@string/record_launcher_label"
             android:icon="@mipmap/ic_launcher_record"
             android:theme="@style/Theme.ExpenseVoice.Record"
             android:taskAffinity="com.sitpro.expensevoice.record"
@@ -38,10 +38,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Icon "Sharko Wallet": Today / Month screens -->
+        <!-- Icon "Ví Cá Mập" (always Vietnamese under the icon): Today / Month screens -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:label="@string/launcher_name"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
