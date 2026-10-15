@@ -7,13 +7,13 @@ Loi yêu cầu làm Phase 2 và 3 cùng lúc (2026-10-11). Hai phase dùng chung
 Checklist SPEC tương ứng:
 
 - Phase 2
-  - [ ] `RecordActivity` + phát hiện im lặng + hàng đợi Room + `UploadWorker` → Task 4–7
-  - [ ] Notification kết quả + Hoàn tác → Task 8
+  - [x] `RecordActivity` + phát hiện im lặng + hàng đợi Room + `UploadWorker` → Task 4–7
+  - [x] Notification kết quả + Hoàn tác → Task 8
   - [ ] Trigger: nút nguồn, Quick Settings tile, widget → Task 9
   - [ ] Bật chế độ máy bay, nói 3 lần, tắt chế độ máy bay → cả 3 lên server, không trùng → Task 13
 - Phase 3
   - [ ] Hôm nay: danh sách, tổng, sửa/xóa → Task 10
-  - [ ] Tháng này: tổng, so với tháng trước, danh mục kèm thanh tỷ lệ → Task 11
+  - [x] Tháng này: tổng, so với tháng trước, danh mục kèm thanh tỷ lệ → Task 11
 
 Backend: **không cần sửa** — dùng nguyên các endpoint Phase 1.
 

@@ -363,15 +363,15 @@ Làm backend trước và test bằng `curl` với file audio thu sẵn, sau đ�
 
 **Phase 2: Ghi âm trên Android**
 
-- [ ] `RecordActivity` + phát hiện im lặng + hàng đợi Room + `UploadWorker`
-- [ ] Notification kết quả + Hoàn tác
+- [x] `RecordActivity` + phát hiện im lặng + hàng đợi Room + `UploadWorker`
+- [x] Notification kết quả + Hoàn tác
 - [ ] Trigger: nút nguồn, Quick Settings tile, widget
 - [ ] Bật chế độ máy bay, nói 3 lần, tắt chế độ máy bay → cả 3 lên server, không trùng
 
 **Phase 3: Màn hình xem**
 
 - [ ] Hôm nay: danh sách, tổng, sửa/xóa
-- [ ] Tháng này: tổng, so với tháng trước, danh mục kèm thanh tỷ lệ
+- [x] Tháng này: tổng, so với tháng trước, danh mục kèm thanh tỷ lệ
 
 **Phase 4: Dùng thật**
 
