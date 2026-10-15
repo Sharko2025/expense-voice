@@ -179,3 +179,4 @@ android/app/src/main/java/com/sitpro/expensevoice/
 - Chưa thử: Hoàn tác từ notification, ghi trên màn hình khóa, widget (màn hình chính + màn hình ngoài), chế độ máy bay, sửa/xóa trên Hôm nay, Tháng này, thời gian từ lúc ngừng nói tới notification ✓.
 
 **2026-10-15** — Loi thử trên Fold 8: ✅ Hoàn tác từ notification · ✅ Lưu thay đổi ngày/giờ (màn sửa).
+**2026-10-15** — ✅ Nút nguồn: Side button → Double press → Open app chỉ liệt kê **"Record expense"** (Samsung lấy launcher activity đầu tiên, kèm label của activity đó). Chọn nó → nhấn đúp nút nguồn khi đang khóa màn hình mở thẳng màn ghi âm, ghi được giao dịch. Giữ 2 icon.

@@ -64,9 +64,9 @@ Sau khi cài, app có **2 icon** (tên theo ngôn ngữ của app: English / ti�
 
 ## 5. Nhấn đúp nút nguồn để ghi âm
 
-**Settings → Advanced features → Side button → Double press** → bật → **Open app** → chọn **Sharko Wallet**.
+**Settings → Advanced features → Side button → Double press** → bật → **Open app** → chọn **Record expense** (hoặc **Ghi chi tiêu** khi app đang ở tiếng Việt).
 
-Danh sách của Samsung chỉ hiện 1 dòng mỗi app; app được cấu hình để lựa chọn này mở thẳng **màn ghi âm** (kể cả khi đang khóa màn hình).
+Danh sách của Samsung chỉ hiện 1 dòng mỗi app, đó là màn ghi âm; nhấn đúp nút nguồn mở thẳng **màn ghi âm**, kể cả khi đang khóa màn hình (đã thử 2026-10-15).
 
 ## 6. Nút ghi âm trong Quick Settings
 
