@@ -177,3 +177,5 @@ android/app/src/main/java/com/sitpro/expensevoice/
 - ✅ Quick Settings tile "Ghi chi tiêu": chạy được.
 - ❌ Nút nguồn: danh sách "Open app" của Samsung không có icon "Ghi chi tiêu" (1 dòng mỗi app). Đã đổi manifest để `RecordActivity` là launcher activity đầu tiên; cài lại, chờ thử.
 - Chưa thử: Hoàn tác từ notification, ghi trên màn hình khóa, widget (màn hình chính + màn hình ngoài), chế độ máy bay, sửa/xóa trên Hôm nay, Tháng này, thời gian từ lúc ngừng nói tới notification ✓.
+
+**2026-10-15** — Loi thử trên Fold 8: ✅ Hoàn tác từ notification · ✅ Lưu thay đổi ngày/giờ (màn sửa).
