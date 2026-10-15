@@ -12,6 +12,7 @@
     <string name="previous">Trước</string>
     <string name="next">Sau</string>
     <string name="record">Ghi âm</string>
+    <string name="language_switch">Đổi ngôn ngữ</string>
 
     <!-- Today -->
     <string name="yesterday">Hôm qua</string>

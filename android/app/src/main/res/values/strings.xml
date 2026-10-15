@@ -13,6 +13,7 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="record">Record</string>
+    <string name="language_switch">Change language</string>
 
     <!-- Today -->
     <string name="yesterday">Yesterday</string>

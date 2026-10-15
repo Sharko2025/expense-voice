@@ -50,6 +50,13 @@ import com.sitpro.expensevoice.ui.SettingsViewModel
 import com.sitpro.expensevoice.ui.TodayScreen
 import com.sitpro.expensevoice.ui.TodayViewModel
 import com.sitpro.expensevoice.ui.rememberTexts
+import com.sitpro.expensevoice.ui.AppLanguage
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import com.sitpro.expensevoice.ui.resolve
 import androidx.compose.ui.res.stringResource
 
@@ -135,6 +142,14 @@ private fun MainScaffold(
                     }
                 },
                 actions = {
+                    // VI / EN switch for demos; the system recreates the activity with the new language.
+                    val context = LocalContext.current
+                    val current = LocalConfiguration.current.locales[0].language
+                    TextButton(onClick = { AppLanguage.set(context, AppLanguage.toggled(current)) }) {
+                        Icon(Icons.Filled.Language, stringResource(R.string.language_switch))
+                        Spacer(Modifier.width(4.dp))
+                        Text(AppLanguage.label(current))
+                    }
                     if (tab != Tab.SETTINGS) {
                         IconButton(onClick = { onTab(Tab.SETTINGS) }) { Icon(Icons.Filled.Settings, stringResource(R.string.settings)) }
                     }

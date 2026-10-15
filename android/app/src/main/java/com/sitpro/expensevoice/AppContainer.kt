@@ -1,6 +1,8 @@
 package com.sitpro.expensevoice
 
 import android.app.Application
+import android.content.res.Configuration
+import com.sitpro.expensevoice.ui.AppLanguage
 import android.content.Context
 import androidx.room.Room
 import com.sitpro.expensevoice.api.ApiService
@@ -70,8 +72,15 @@ class ExpenseApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppLanguage.applyDefaultOnce(this)
         container = AppContainer(this)
         container.notifier.createChannels()
         container.resendQueue()
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Language switched: rename the notification channels shown in Android Settings.
+        if (::container.isInitialized) container.notifier.createChannels()
     }
 }
