@@ -115,3 +115,4 @@ Hiện màn sửa không có ô ngày giờ, nên giao dịch ghi muộn (ví d�
   - Màn sửa: có ô Date/Time; mở hết chiều cao (trước đó nửa chừng, phải kéo mới thấy Save) và cuộn được; DatePicker mở đúng ngày.
 - Còn lại: audio tiếng Anh thật (Loi nhờ người Mỹ ghi sau); thử lưu đổi ngày/giờ trên máy (để Loi tự làm trên dữ liệu thật).
 - Ghi chú: adb trong `C:\Users\loi\platform-tools` quá cũ, không nhận Fold 8 qua USB → dùng `%LOCALAPPDATA%\Android\Sdk\platform-tools\adb.exe`.
+- 2026-10-15: nút 🌐 VI/EN + mặc định tiếng Việt — Loi kiểm tra trên Fold 8: OK. Luật "X mươi chục" đã deploy EC2 (E3 qua HTTPS: 420.000đ).
