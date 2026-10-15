@@ -180,3 +180,4 @@ android/app/src/main/java/com/sitpro/expensevoice/
 
 **2026-10-15** — Loi thử trên Fold 8: ✅ Hoàn tác từ notification · ✅ Lưu thay đổi ngày/giờ (màn sửa).
 **2026-10-15** — ✅ Nút nguồn: Side button → Double press → Open app chỉ liệt kê **"Record expense"** (Samsung lấy launcher activity đầu tiên, kèm label của activity đó). Chọn nó → nhấn đúp nút nguồn khi đang khóa màn hình mở thẳng màn ghi âm, ghi được giao dịch. Giữ 2 icon.
+**2026-10-15** — ✅ Logo mới trên Fold 8: icon "Sharko Wallet" (vây cá mập, nền navy) và "Record expense" (micro navy, nền cam) hiện đúng trong ngăn ứng dụng. Tên icon trên launcher theo ngôn ngữ của máy (English), không theo ngôn ngữ riêng của app — hành vi chuẩn của Android. Nhãn "Record expense" bị cắt thành "Record expen…".
