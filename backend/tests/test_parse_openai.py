@@ -87,3 +87,26 @@ def test_en_groceries_transfer():
 
 def test_en_no_amount():
     assert parse("the weather is nice today") == []
+
+
+# ---- STT mishearing "X mươi chục" (backlog 2026-10-15) ----
+
+
+@pytest.mark.parametrize("_run", range(3))
+def test_misheard_muoi_chuc_is_x_chuc(_run):
+    [tx] = parse("mua đồ trên Shopee, bốn trăm hai mươi chục ngàn, cà thẻ")
+    assert (tx["amount_vnd"], tx["method"]) == (420000, "card")
+
+
+def test_misheard_muoi_chuc_small():
+    [tx] = parse("gửi xe máy hai mươi chục ngàn")
+    assert tx["amount_vnd"] == 20000
+
+
+@pytest.mark.parametrize(
+    "text,amount",
+    [("cafe ba mươi ngàn", 30000), ("cơm hai mươi lăm ngàn", 25000), ("đổ xăng năm mươi nghìn", 50000)],
+)
+def test_real_muoi_is_unchanged(text, amount):
+    [tx] = parse(text)
+    assert tx["amount_vnd"] == amount
