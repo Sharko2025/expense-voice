@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Enables Settings > Apps > Shark Wallet > Language (per-app language, Android 13+). -->
+<!-- Enables Settings > Apps > Sharko Wallet > Language (per-app language, Android 13+). -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="en" />
     <locale android:name="vi" />

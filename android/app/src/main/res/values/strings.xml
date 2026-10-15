@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- English is the default; Vietnamese lives in values-vi. Keep both files in sync (StringsCompletenessTest). -->
 <resources>
-    <string name="app_name">Shark Wallet</string>
+    <string name="app_name">Sharko Wallet</string>
     <string name="record_label">Record expense</string>
     <string name="widget_description">One-tap voice expense button</string>
 

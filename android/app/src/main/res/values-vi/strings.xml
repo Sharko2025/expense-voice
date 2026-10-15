@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Cá Mập Ví</string>
+    <string name="app_name">Ví Cá Mập</string>
     <string name="record_label">Ghi chi tiêu</string>
     <string name="widget_description">Nút ghi chi tiêu bằng giọng nói</string>
 

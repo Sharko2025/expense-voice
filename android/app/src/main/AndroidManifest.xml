@@ -38,7 +38,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Icon "Shark Wallet": Today / Month screens -->
+        <!-- Icon "Sharko Wallet": Today / Month screens -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

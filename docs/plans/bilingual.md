@@ -4,7 +4,7 @@ Trạng thái: **đã duyệt 2026-10-14**, đang làm · viết 2026-10-11 · �
 
 Đây là yêu cầu mới, chưa có trong SPEC. Phạm vi Loi đã chốt (2026-10-11):
 
-1. **Giao diện theo ngôn ngữ máy.** Máy để English → app English; máy để tiếng Việt → app tiếng Việt. Đổi riêng cho app ở **Settings → Apps → Chi tiêu → Language**.
+1. **Giao diện theo ngôn ngữ máy.** Máy để English → app English; máy để tiếng Việt → app tiếng Việt. Đổi riêng cho app ở **Settings → Apps → Sharko Wallet → Language**.
 2. **Nói được cả 2 thứ tiếng.** Server tự nhận câu tiếng Việt hay tiếng Anh.
 3. **Danh mục được dịch khi hiển thị** (Breakfast, Coffee/Drinks…). DB vẫn giữ tên tiếng Việt.
 
@@ -56,7 +56,7 @@ Thêm vào `test_parse_openai.py`:
   - `res/values/strings.xml`: **English** (mặc định cho mọi máy không phải tiếng Việt).
   - `res/values-vi/strings.xml`: tiếng Việt (giữ nguyên chữ hiện tại).
 - Khai báo `locales_config.xml` → hiện mục **Language** riêng cho app trong Settings của Android.
-- Tên app: **"Cá Mập Ví"** (tiếng Việt) / **"Shark Wallet"** (English) — theo biệt danh Sharko của Loi (duyệt 2026-10-14). Icon ghi âm: "Ghi chi tiêu" / "Record expense".
+- Tên app: **"Ví Cá Mập"** (tiếng Việt) / **"Sharko Wallet"** (English) — theo biệt danh Sharko của Loi (đổi 2026-10-15; trước đó "Cá Mập Ví" / "Shark Wallet"). Icon ghi âm: "Ghi chi tiêu" / "Record expense".
 - Gồm: màn Hôm nay / Tháng này / Cài đặt, màn ghi âm, notification (✓, Hoàn tác, Đang gửi…, Không hiểu…), Snackbar, thông báo lỗi, tile, widget.
 
 ### B2. Dữ liệu hiển thị
