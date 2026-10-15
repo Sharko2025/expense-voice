@@ -1,14 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo option 7 "Vây cá mập tối giản" (chosen 2026-10-15). Artwork drawn on a 100-unit grid,
+     scaled 0.8 into the centre of the 108dp adaptive canvas so the fin tip stays inside the safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <group android:translateX="30" android:translateY="30">
-        <!-- Material "mic" icon scaled to 48dp inside the 108dp adaptive canvas -->
-        <group android:scaleX="2" android:scaleY="2">
-            <path
-                android:fillColor="#FFFFFF"
-                android:pathData="M12,14c1.66,0 2.99,-1.34 2.99,-3L15,5c0,-1.66 -1.34,-3 -3,-3S9,3.34 9,5v6c0,1.66 1.34,3 3,3zM17.3,11c0,3 -2.54,5.1 -5.3,5.1S6.7,14 6.7,11L5,11c0,3.41 2.72,6.23 6,6.72L11,21h2v-3.28c3.28,-0.48 6,-3.3 6,-6.72h-1.7z" />
-        </group>
+    <group
+        android:pivotX="50"
+        android:pivotY="50"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="4"
+        android:translateY="4">
+        <path
+            android:fillColor="#F28C28"
+            android:pathData="M30,64 C40,48 52,30 71,17 C65,32 65,50 73,64 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M12,66 Q22,58 32,66 T52,66 T72,66 T92,66"
+            android:strokeColor="#3FA7D6"
+            android:strokeLineCap="round"
+            android:strokeWidth="7" />
+        <path
+            android:fillColor="#00000000"
+            android:pathData="M22,79 Q30,73 38,79 T54,79 T70,79 T86,79"
+            android:strokeAlpha="0.55"
+            android:strokeColor="#3FA7D6"
+            android:strokeLineCap="round"
+            android:strokeWidth="4" />
     </group>
 </vector>

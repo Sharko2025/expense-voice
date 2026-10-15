@@ -104,7 +104,7 @@ class ResultNotifier(private val context: Context) : ResultSink {
         post(entryId, base(CHANNEL_SENDING).setContentTitle(str(R.string.notif_undoing)).setSilent(true))
 
     private fun base(channel: String) = NotificationCompat.Builder(context, channel)
-        .setSmallIcon(R.drawable.ic_stat_mic)
+        .setSmallIcon(R.drawable.ic_stat_shark)
         .setAutoCancel(true)
         .setContentIntent(
             PendingIntent.getActivity(

@@ -49,7 +49,7 @@ class QuickWidget : GlanceAppWidget() {
             Box(
                 GlanceModifier.fillMaxSize()
                     .cornerRadius(28.dp)
-                    .background(ColorProvider(Color(0xFF0F766E)))
+                    .background(ColorProvider(Color(0xFF0B2545)))
                     .clickable(actionStartActivity<RecordActivity>()),
                 contentAlignment = Alignment.Center,
             ) {

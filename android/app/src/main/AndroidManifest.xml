@@ -23,7 +23,7 @@
             android:name=".capture.RecordActivity"
             android:exported="true"
             android:label="@string/record_label"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_launcher_record"
             android:theme="@style/Theme.ExpenseVoice.Record"
             android:taskAffinity="com.sitpro.expensevoice.record"
             android:launchMode="singleTask"
