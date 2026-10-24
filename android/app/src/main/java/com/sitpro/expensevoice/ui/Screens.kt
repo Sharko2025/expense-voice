@@ -2,6 +2,7 @@ package com.sitpro.expensevoice.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
@@ -61,6 +64,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -110,7 +115,10 @@ fun TodayScreen(vm: TodayViewModel, contentPadding: PaddingValues) {
     val updatedAt by vm.updatedAt.collectAsState()
     val refreshing by vm.refreshing.collectAsState()
     val categories by vm.categories.collectAsState()
+    val selected by vm.selected.collectAsState()
     var editing by remember { mutableStateOf<CachedTransaction?>(null) }
+    val selecting = selected.isNotEmpty()
+    BackHandler(enabled = selecting, onBack = vm::clearSelection)
 
     PullToRefreshBox(refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize().padding(contentPadding)) {
         // Bottom padding keeps the last rows clear of the big centered mic button.
@@ -140,7 +148,12 @@ fun TodayScreen(vm: TodayViewModel, contentPadding: PaddingValues) {
                 }
             }
             items(list, key = { it.id }) { tx ->
-                TransactionRow(tx, texts, onClick = { editing = tx })
+                TransactionRow(
+                    tx, texts,
+                    selected = if (selecting) tx.id in selected else null,
+                    onClick = { if (selecting) vm.toggleSelected(tx.id) else editing = tx },
+                    onLongClick = { vm.toggleSelected(tx.id) },
+                )
                 HorizontalDivider()
             }
         }
@@ -157,12 +170,27 @@ fun TodayScreen(vm: TodayViewModel, contentPadding: PaddingValues) {
     }
 }
 
+/** [selected] is null outside selection mode, otherwise whether this row is ticked. */
 @Composable
-private fun TransactionRow(tx: CachedTransaction, texts: Texts, onClick: () -> Unit) {
+private fun TransactionRow(
+    tx: CachedTransaction,
+    texts: Texts,
+    selected: Boolean?,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+) {
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth()
+            .background(if (selected == true) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .padding(start = if (selected != null) 8.dp else 20.dp, end = 20.dp, top = 12.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (selected != null) {
+            // The whole row toggles; the checkbox only shows the state.
+            Checkbox(checked = selected, onCheckedChange = null)
+            Spacer(Modifier.width(8.dp))
+        }
         Text(
             formatTime(Instant.ofEpochMilli(tx.occurredAtMillis)),
             style = MaterialTheme.typography.labelLarge,
@@ -330,6 +358,32 @@ private fun PickerField(label: String, value: String, modifier: Modifier, onClic
                 .clickable(onClick = onClick)
                 .semantics(mergeDescendants = true) { contentDescription = "$label: $value" }
         )
+    }
+}
+
+/** Recordings not processed yet; shown above every tab, hidden when nothing is waiting. */
+@Composable
+fun PendingStrip(banner: PendingBanner, onOpenSettings: () -> Unit) {
+    val texts = rememberTexts()
+    val res = when (banner.kind) {
+        PendingBanner.Kind.PROCESSING -> R.plurals.pending_processing
+        PendingBanner.Kind.OFFLINE -> R.plurals.pending_offline
+        PendingBanner.Kind.BLOCKED -> R.plurals.pending_blocked
+    }
+    val blocked = banner.kind == PendingBanner.Kind.BLOCKED
+    Column(
+        Modifier.fillMaxWidth()
+            .background(if (blocked) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer)
+            .then(if (blocked) Modifier.clickable(onClick = onOpenSettings) else Modifier)
+    ) {
+        Text(
+            texts.plural(res, banner.count),
+            Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (blocked) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+        // No progress value = indeterminate: the app can't know how far the server has got.
+        if (banner.kind == PendingBanner.Kind.PROCESSING) LinearProgressIndicator(Modifier.fillMaxWidth())
     }
 }
 

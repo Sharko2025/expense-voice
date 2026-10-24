@@ -14,7 +14,19 @@ import com.sitpro.expensevoice.data.SettingsStore
 import com.sitpro.expensevoice.notify.ResultNotifier
 import com.sitpro.expensevoice.sync.UploadProcessor
 import com.sitpro.expensevoice.sync.UploadScheduler
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import com.sitpro.expensevoice.ui.PendingBanner
+import com.sitpro.expensevoice.ui.pendingBanner
 import java.io.File
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,6 +55,24 @@ class AppContainer(context: Context) {
     val notifier = ResultNotifier(appContext)
     val processor = UploadProcessor(::api, db.pendingDao(), repository, notifier)
     val scheduler = UploadScheduler(appContext)
+
+    /** Validated internet, kept current by a network callback (drives the in-app pending strip). */
+    val online: StateFlow<Boolean> = callbackFlow {
+        val cm = appContext.getSystemService(ConnectivityManager::class.java)
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                trySend(caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED))
+            }
+            override fun onLost(network: Network) {
+                trySend(false)
+            }
+        }
+        cm.registerDefaultNetworkCallback(callback)
+        awaitClose { cm.unregisterNetworkCallback(callback) }
+    }.stateIn(appScope, SharingStarted.Eagerly, scheduler.isOnline())
+
+    val pendingBanner: Flow<PendingBanner?> =
+        combine(db.pendingDao().observeAll(), online) { rows, isOnline -> pendingBanner(rows, isOnline) }
 
     val pendingDir: File = File(appContext.filesDir, "pending").apply { mkdirs() }
 

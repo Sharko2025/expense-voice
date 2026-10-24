@@ -28,6 +28,36 @@
     <string name="updated_at">updated %s</string>
     <string name="deleted_item">Deleted %s</string>
     <string name="moved_to">Moved to %s</string>
+    <plurals name="selected_count">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected</item>
+    </plurals>
+    <string name="select_all">Select all</string>
+    <string name="exit_selection">Exit selection</string>
+    <string name="delete_selected">Delete selected</string>
+    <plurals name="confirm_delete_many">
+        <item quantity="one">Delete %d transaction?</item>
+        <item quantity="other">Delete %d transactions?</item>
+    </plurals>
+    <plurals name="deleted_many">
+        <item quantity="one">Deleted %d transaction</item>
+        <item quantity="other">Deleted %d transactions</item>
+    </plurals>
+    <string name="deleted_partial">Deleted %1$d/%2$d, the rest failed</string>
+
+    <!-- In-app strip for recordings not processed yet -->
+    <plurals name="pending_processing">
+        <item quantity="one">Processing %d recording…</item>
+        <item quantity="other">Processing %d recordings…</item>
+    </plurals>
+    <plurals name="pending_offline">
+        <item quantity="one">%d recording waiting for network</item>
+        <item quantity="other">%d recordings waiting for network</item>
+    </plurals>
+    <plurals name="pending_blocked">
+        <item quantity="one">%d recording waiting for a valid token — tap to open Settings</item>
+        <item quantity="other">%d recordings waiting for a valid token — tap to open Settings</item>
+    </plurals>
     <string name="undo">Undo</string>
 
     <!-- Edit sheet -->

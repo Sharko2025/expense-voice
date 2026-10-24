@@ -4,6 +4,7 @@ import com.sitpro.expensevoice.R
 import com.sitpro.expensevoice.api.CategoryTotalDto
 import com.sitpro.expensevoice.api.SummaryDto
 import com.sitpro.expensevoice.data.CachedTransaction
+import com.sitpro.expensevoice.data.PendingUpload
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -116,5 +117,30 @@ class ScreenLogicTest {
             byCategory = listOf(1_200_000L, 300_000L, 0L).mapIndexed { i, t -> CategoryTotalDto(i, "c$i", t, 1) },
         )
         assertEquals(listOf(1f, 0.25f, 0f), categoryBars(s).map { it.fraction })
+    }
+
+    private fun pending(id: String, blocked: Boolean = false) = PendingUpload(id, "/f/$id.m4a", "2026-10-24T08:00:00+07:00", 1L, blocked = blocked)
+
+    @Test
+    fun noBannerWhenNothingIsPending() {
+        assertNull(pendingBanner(emptyList(), online = true))
+        assertNull(pendingBanner(emptyList(), online = false))
+    }
+
+    @Test
+    fun processingWhenOnline() {
+        assertEquals(PendingBanner(PendingBanner.Kind.PROCESSING, 2), pendingBanner(listOf(pending("a"), pending("b")), online = true))
+    }
+
+    @Test
+    fun waitingForNetworkWhenOffline() {
+        assertEquals(PendingBanner(PendingBanner.Kind.OFFLINE, 1), pendingBanner(listOf(pending("a")), online = false))
+    }
+
+    @Test
+    fun blockedOnlyWhenNothingElseCanBeSent() {
+        assertEquals(PendingBanner(PendingBanner.Kind.BLOCKED, 2), pendingBanner(listOf(pending("a", true), pending("b", true)), online = true))
+        // Rows still sendable win: the strip shows what is actually happening now.
+        assertEquals(PendingBanner(PendingBanner.Kind.PROCESSING, 1), pendingBanner(listOf(pending("a", true), pending("b")), online = true))
     }
 }

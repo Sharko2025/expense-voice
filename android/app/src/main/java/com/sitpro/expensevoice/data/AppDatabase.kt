@@ -60,6 +60,9 @@ interface PendingDao {
     @Query("SELECT * FROM pending_uploads ORDER BY createdAtMillis")
     suspend fun all(): List<PendingUpload>
 
+    @Query("SELECT * FROM pending_uploads ORDER BY createdAtMillis")
+    fun observeAll(): Flow<List<PendingUpload>>
+
     @Query("SELECT COUNT(*) FROM pending_uploads")
     fun countFlow(): Flow<Int>
 

@@ -13,6 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.JsonObject
 
+/** Outcome of a one-by-one bulk call: ids that succeeded, and the error that stopped the rest. */
+data class BulkResult(val done: List<String>, val error: Exception?)
+
 /** Room is what the screens show; the server is the source of truth that refreshes it. */
 class ExpenseRepository(private val api: () -> ApiService, private val db: AppDatabase) {
     private val transactions = db.transactionDao()
@@ -46,6 +49,24 @@ class ExpenseRepository(private val api: () -> ApiService, private val db: AppDa
 
     suspend fun restore(id: String) {
         transactions.upsert(listOf(api().restoreTransaction(id).toCached()))
+    }
+
+    /** Stops at the first failure (usually the network), so the rest stay as they were. */
+    suspend fun deleteMany(ids: List<String>): BulkResult = eachUntilFailure(ids, ::delete)
+
+    suspend fun restoreMany(ids: List<String>): BulkResult = eachUntilFailure(ids, ::restore)
+
+    private suspend fun eachUntilFailure(ids: List<String>, action: suspend (String) -> Unit): BulkResult {
+        val done = mutableListOf<String>()
+        for (id in ids) {
+            try {
+                action(id)
+            } catch (e: Exception) {
+                return BulkResult(done, e)
+            }
+            done += id
+        }
+        return BulkResult(done, null)
     }
 
     suspend fun removeVoiceEntry(entryId: String) = transactions.deleteByVoiceEntry(entryId)

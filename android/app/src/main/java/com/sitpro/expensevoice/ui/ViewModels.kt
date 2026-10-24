@@ -28,13 +28,20 @@ fun currentMonth(): YearMonth = YearMonth.now(VN_ZONE)
 
 /**
  * Text to show, resolved in the UI so it follows the app language.
- * `arg` is a String/Int format argument, or a LocalDate shown as a short date.
+ * `arg` is a String/Int format argument, a list of them, or a LocalDate shown as a short date.
+ * With `count`, `res` is a plurals resource formatted with that count.
  */
-data class UiMessage(@StringRes val res: Int, val arg: Any? = null, val undoTransactionId: String? = null)
+data class UiMessage(
+    val res: Int,
+    val arg: Any? = null,
+    val undoTransactionIds: List<String> = emptyList(),
+    val count: Int? = null,
+)
 
-fun Texts.resolve(msg: UiMessage): String = when (val a = msg.arg) {
+fun Texts.resolve(msg: UiMessage): String = if (msg.count != null) plural(msg.res, msg.count) else when (val a = msg.arg) {
     null -> get(msg.res)
     is LocalDate -> get(msg.res, shortDate(a))
+    is List<*> -> get(msg.res, *a.filterNotNull().toTypedArray())
     else -> get(msg.res, a)
 }
 
@@ -84,8 +91,41 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
     fun shiftDay(days: Long) {
         val next = day.value.plusDays(days)
         if (next > today()) return
+        clearSelection()
         day.value = next
         refresh()
+    }
+
+    // ---- Multi-select (long-press a row) ----
+
+    /** Ids of selected rows; empty = not in selection mode. Lives here so it survives folding the phone. */
+    val selected = MutableStateFlow<Set<String>>(emptySet())
+
+    fun toggleSelected(id: String) {
+        selected.value = if (id in selected.value) selected.value - id else selected.value + id
+    }
+
+    fun selectAll() {
+        selected.value = transactions.value.map { it.id }.toSet()
+    }
+
+    fun clearSelection() {
+        selected.value = emptySet()
+    }
+
+    fun deleteSelected() {
+        val ids = transactions.value.map { it.id }.filter { it in selected.value }
+        clearSelection()
+        if (ids.isEmpty()) return
+        viewModelScope.launch {
+            val result = repo.deleteMany(ids)
+            val message = when {
+                result.error == null -> UiMessage(R.plurals.deleted_many, count = ids.size, undoTransactionIds = result.done)
+                result.done.isEmpty() -> errorMessage(result.error)
+                else -> UiMessage(R.string.deleted_partial, listOf(result.done.size, ids.size), undoTransactionIds = result.done)
+            }
+            _messages.tryEmit(message)
+        }
     }
 
     fun save(original: CachedTransaction, edit: TransactionEdit, onDone: () -> Unit) {
@@ -110,20 +150,16 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
             try {
                 repo.delete(tx.id)
                 onDone()
-                _messages.tryEmit(UiMessage(R.string.deleted_item, tx.item, undoTransactionId = tx.id))
+                _messages.tryEmit(UiMessage(R.string.deleted_item, tx.item, undoTransactionIds = listOf(tx.id)))
             } catch (e: Exception) {
                 _messages.tryEmit(errorMessage(e))
             }
         }
     }
 
-    fun restore(id: String) {
+    fun restore(ids: List<String>) {
         viewModelScope.launch {
-            try {
-                repo.restore(id)
-            } catch (e: Exception) {
-                _messages.tryEmit(errorMessage(e))
-            }
+            repo.restoreMany(ids).error?.let { _messages.tryEmit(errorMessage(it)) }
         }
     }
 }

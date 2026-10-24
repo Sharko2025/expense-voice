@@ -59,6 +59,19 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.sitpro.expensevoice.ui.resolve
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.collectAsState
+import com.sitpro.expensevoice.ui.PendingBanner
+import com.sitpro.expensevoice.ui.PendingStrip
 
 private enum class Tab { TODAY, MONTH, SETTINGS }
 
@@ -88,14 +101,18 @@ class MainActivity : ComponentActivity() {
                 val texts = rememberTexts()
                 LaunchedEffect(texts) {
                     todayVm.messages.collect { msg ->
+                        val undo = msg.undoTransactionIds
                         val result = snackbar.showSnackbar(
                             texts.resolve(msg),
-                            actionLabel = msg.undoTransactionId?.let { texts.get(R.string.undo) },
+                            actionLabel = if (undo.isNotEmpty()) texts.get(R.string.undo) else null,
                             duration = SnackbarDuration.Short,
                         )
-                        if (result == SnackbarResult.ActionPerformed) msg.undoTransactionId?.let(todayVm::restore)
+                        if (result == SnackbarResult.ActionPerformed && undo.isNotEmpty()) todayVm.restore(undo)
                     }
                 }
+                val banner by c.pendingBanner.collectAsState(initial = null)
+                val selected by todayVm.selected.collectAsState()
+                var confirmDelete by remember { mutableStateOf(false) }
 
                 MainScaffold(
                     tab = tab,
@@ -105,11 +122,30 @@ class MainActivity : ComponentActivity() {
                         tab = it
                     },
                     snackbar = snackbar,
+                    banner = banner,
+                    selectedCount = if (tab == Tab.TODAY) selected.size else 0,
+                    onSelectAll = todayVm::selectAll,
+                    onDeleteSelected = { confirmDelete = true },
+                    onExitSelection = todayVm::clearSelection,
                     onRecord = { startActivity(Intent(this, RecordActivity::class.java)) },
                     today = { TodayScreen(todayVm, it) },
                     month = { MonthScreen(monthVm, it) },
                     settings = { SettingsScreen(settingsVm, it) },
                 )
+
+                if (confirmDelete) {
+                    AlertDialog(
+                        onDismissRequest = { confirmDelete = false },
+                        text = { Text(texts.plural(R.plurals.confirm_delete_many, selected.size)) },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                confirmDelete = false
+                                todayVm.deleteSelected()
+                            }) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+                        },
+                        dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.cancel)) } },
+                    )
+                }
             }
         }
     }
@@ -127,6 +163,11 @@ private fun MainScaffold(
     tab: Tab,
     onTab: (Tab) -> Unit,
     snackbar: SnackbarHostState,
+    banner: PendingBanner?,
+    selectedCount: Int,
+    onSelectAll: () -> Unit,
+    onDeleteSelected: () -> Unit,
+    onExitSelection: () -> Unit,
     onRecord: () -> Unit,
     today: @androidx.compose.runtime.Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit,
     month: @androidx.compose.runtime.Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit,
@@ -134,7 +175,9 @@ private fun MainScaffold(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            if (selectedCount > 0) {
+                SelectionBar(selectedCount, onSelectAll, onDeleteSelected, onExitSelection)
+            } else TopAppBar(
                 title = { Text(stringResource(if (tab == Tab.SETTINGS) R.string.settings else R.string.app_name)) },
                 navigationIcon = {
                     if (tab == Tab.SETTINGS) {
@@ -166,7 +209,8 @@ private fun MainScaffold(
         },
         floatingActionButton = {
             // Big, centered mic: recording is the main action of the app.
-            if (tab != Tab.SETTINGS) {
+            // Hidden while selecting so a stray tap doesn't start a recording.
+            if (tab != Tab.SETTINGS && selectedCount == 0) {
                 FloatingActionButton(
                     onClick = onRecord,
                     modifier = Modifier.size(80.dp),
@@ -177,10 +221,31 @@ private fun MainScaffold(
         floatingActionButtonPosition = FabPosition.Center,
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        when (tab) {
-            Tab.TODAY -> today(padding)
-            Tab.MONTH -> month(padding)
-            Tab.SETTINGS -> settings(padding)
+        Column(Modifier.fillMaxSize().padding(top = padding.calculateTopPadding())) {
+            banner?.let { PendingStrip(it, onOpenSettings = { onTab(Tab.SETTINGS) }) }
+            Box(Modifier.weight(1f)) {
+                val rest = PaddingValues(bottom = padding.calculateBottomPadding())
+                when (tab) {
+                    Tab.TODAY -> today(rest)
+                    Tab.MONTH -> month(rest)
+                    Tab.SETTINGS -> settings(rest)
+                }
+            }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@androidx.compose.runtime.Composable
+private fun SelectionBar(count: Int, onSelectAll: () -> Unit, onDelete: () -> Unit, onExit: () -> Unit) {
+    val texts = rememberTexts()
+    TopAppBar(
+        title = { Text(texts.plural(R.plurals.selected_count, count)) },
+        navigationIcon = { IconButton(onClick = onExit) { Icon(Icons.Filled.Close, stringResource(R.string.exit_selection)) } },
+        actions = {
+            TextButton(onClick = onSelectAll) { Text(stringResource(R.string.select_all)) }
+            IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, stringResource(R.string.delete_selected)) }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+    )
 }

@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import com.sitpro.expensevoice.R
 import com.sitpro.expensevoice.api.SummaryDto
 import com.sitpro.expensevoice.data.CachedTransaction
+import com.sitpro.expensevoice.data.PendingUpload
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -82,5 +83,20 @@ fun categoryBars(summary: SummaryDto): List<CategoryBar> {
     val max = summary.byCategory.maxOfOrNull { it.totalVnd } ?: 0L
     return summary.byCategory.map {
         CategoryBar(it.category, it.totalVnd, it.count, if (max > 0) it.totalVnd.toFloat() / max else 0f)
+    }
+}
+
+/** The in-app strip for recordings not processed yet. */
+data class PendingBanner(val kind: Kind, val count: Int) {
+    enum class Kind { PROCESSING, OFFLINE, BLOCKED }
+}
+
+/** Rows that can still be sent decide the strip; blocked rows (401) only show once nothing else is waiting. */
+fun pendingBanner(rows: List<PendingUpload>, online: Boolean): PendingBanner? {
+    val sendable = rows.count { !it.blocked }
+    return when {
+        sendable > 0 -> PendingBanner(if (online) PendingBanner.Kind.PROCESSING else PendingBanner.Kind.OFFLINE, sendable)
+        rows.isNotEmpty() -> PendingBanner(PendingBanner.Kind.BLOCKED, rows.size)
+        else -> null
     }
 }

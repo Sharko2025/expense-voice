@@ -27,3 +27,4 @@
 - 2026-10-15 · Đổi tên app · Loi đổi thành **Ví Cá Mập** (tiếng Việt) / **Sharko Wallet** (English), thay "Cá Mập Ví" / "Shark Wallet".
 - 2026-10-15 · Logo app · Loi chọn phương án 7 "Vây cá mập tối giản" (canvas https://claude.ai/artifact/SU3SWyAcQdD7kurZThQgAJ). Icon "Record expense": nền cam, micro navy. Icon notification: vây cá mập trắng. Widget: nền navy.
 - 2026-10-15 · Tên dưới icon · Loi muốn luôn là **Ví Cá Mập** (kể cả máy để English); icon ghi âm rút gọn thành **Record** / **Ghi âm**. Tiêu đề trong app vẫn theo ngôn ngữ app.
+- 2026-10-24 · Thanh tiến trình trong app + chọn nhiều để xóa (yêu cầu mới) · Kế hoạch `docs/plans/in-app-progress-multiselect.md`. **Đã duyệt 2026-10-24**, đã ghi vào SPEC.

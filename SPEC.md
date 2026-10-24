@@ -236,6 +236,7 @@ app/src/main/java/.../
 - Chạm vào 1 dòng → bottom sheet sửa (item, số tiền, ngày, giờ, danh mục, phương thức, nơi mua) hoặc xóa. Ngày giờ theo giờ Việt Nam, không cho chọn tương lai; chuyển sang ngày khác thì báo "Đã chuyển sang dd/MM".
 - Kéo xuống để tải lại; chuyển ngày bằng mũi tên trái/phải.
 - Nút micro nổi để ghi âm ngay trong app.
+- Nhấn giữ 1 dòng → chế độ chọn nhiều: chạm để chọn/bỏ chọn, "Chọn tất cả", nút xóa (hỏi xác nhận "Xóa n giao dịch?") → snackbar "Đã xóa n giao dịch" + **Hoàn tác** khôi phục tất cả. Lỗi giữa chừng thì dừng, báo "Đã xóa x/n", Hoàn tác vẫn khôi phục các mục đã xóa. Nút micro ẩn khi đang chọn; Back hoặc ✕ để thoát. (bổ sung 2026-10-24)
 
 **Màn hình Tháng này**
 
@@ -243,6 +244,8 @@ app/src/main/java/.../
 - Danh sách danh mục xếp theo số tiền giảm dần, mỗi dòng có thanh ngang tỷ lệ vẽ bằng Compose (không dùng thư viện biểu đồ).
 - Chuyển tháng bằng mũi tên trái/phải.
 - Dữ liệu từ `GET /summary`; mất mạng thì hiện cache gần nhất kèm dòng "cập nhật lúc …".
+
+**Dải "Đang xử lý"** (bổ sung 2026-10-24): còn bản ghi âm chưa xử lý xong thì hiện 1 dải mỏng dưới thanh trên cùng, trên mọi tab: "Đang xử lý n bản ghi âm…" + thanh tiến trình chạy liên tục; mất mạng → "n bản ghi âm chờ mạng" (không chạy); lỗi token → "n bản ghi âm chờ sửa token — chạm để mở Cài đặt". Không còn gì chờ thì ẩn hẳn.
 
 **Cài đặt** (màn hình phụ): URL server, device token, nút "Gửi lại hàng đợi", số mục đang chờ.
 

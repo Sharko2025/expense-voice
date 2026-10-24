@@ -25,6 +25,30 @@
     <string name="updated_at">cập nhật lúc %s</string>
     <string name="deleted_item">Đã xóa %s</string>
     <string name="moved_to">Đã chuyển sang %s</string>
+    <plurals name="selected_count">
+        <item quantity="other">%d đã chọn</item>
+    </plurals>
+    <string name="select_all">Chọn tất cả</string>
+    <string name="exit_selection">Thoát chọn</string>
+    <string name="delete_selected">Xóa mục đã chọn</string>
+    <plurals name="confirm_delete_many">
+        <item quantity="other">Xóa %d giao dịch?</item>
+    </plurals>
+    <plurals name="deleted_many">
+        <item quantity="other">Đã xóa %d giao dịch</item>
+    </plurals>
+    <string name="deleted_partial">Đã xóa %1$d/%2$d, phần còn lại bị lỗi</string>
+
+    <!-- In-app strip for recordings not processed yet -->
+    <plurals name="pending_processing">
+        <item quantity="other">Đang xử lý %d bản ghi âm…</item>
+    </plurals>
+    <plurals name="pending_offline">
+        <item quantity="other">%d bản ghi âm chờ mạng</item>
+    </plurals>
+    <plurals name="pending_blocked">
+        <item quantity="other">%d bản ghi âm chờ sửa token — chạm để mở Cài đặt</item>
+    </plurals>
     <string name="undo">Hoàn tác</string>
 
     <!-- Edit sheet -->

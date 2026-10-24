@@ -1,6 +1,7 @@
 package com.sitpro.expensevoice.ui
 
 import android.content.res.Resources
+import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -35,6 +36,8 @@ class Texts(private val res: Resources) {
     private fun pattern(@StringRes id: Int) = DateTimeFormatter.ofPattern(res.getString(id), locale)
 
     fun get(@StringRes id: Int, vararg args: Any): String = res.getString(id, *args)
+
+    fun plural(@PluralsRes id: Int, count: Int): String = res.getQuantityString(id, count, count)
 
     fun method(method: String?): String = when (method) {
         "cash" -> res.getString(R.string.method_cash)
