@@ -27,6 +27,11 @@ import org.junit.runner.RunWith
 
 class FakeResults : ResultSink {
     val events = mutableListOf<String>()
+    /** Kept apart from [events] so outcome assertions stay about outcomes. */
+    val processing = mutableListOf<String>()
+    override fun processing(entryId: String) {
+        processing += entryId
+    }
     override fun success(entryId: String, transactions: List<TransactionDto>) {
         events += "success:$entryId:${transactions.size}"
     }
@@ -177,6 +182,23 @@ class UploadProcessorTest {
         assertTrue(file.exists())
         assertTrue(db.pendingDao().get(entryId)!!.blocked)
         assertEquals(listOf("unauthorized:$entryId"), results.events)
+    }
+
+    @Test
+    fun reportsProcessingBeforeEachSendAttempt() = runTest {
+        queueRecording()
+        respond(503)
+        processor.process(entryId)
+        respond(200, okBody)
+        processor.process(entryId)
+        assertEquals(listOf(entryId, entryId), results.processing)
+    }
+
+    @Test
+    fun missingFileIsNeverReportedAsProcessing() = runTest {
+        queueRecording().delete()
+        processor.process(entryId)
+        assertEquals(emptyList<String>(), results.processing)
     }
 
     @Test

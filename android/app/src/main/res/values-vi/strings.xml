@@ -106,7 +106,7 @@
     <!-- Notifications -->
     <string name="channel_result">Kết quả ghi chi tiêu</string>
     <string name="channel_sending">Đang gửi</string>
-    <string name="notif_sending">⏳ Đang gửi…</string>
+    <string name="notif_sending">Đang xử lý…</string>
     <string name="notif_offline">Đã lưu, sẽ gửi khi có mạng</string>
     <string name="notif_many">✓ %1$d giao dịch · %2$s</string>
     <string name="notif_not_understood">Không hiểu, nói lại nhé</string>

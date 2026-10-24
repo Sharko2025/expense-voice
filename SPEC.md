@@ -223,10 +223,10 @@ app/src/main/java/.../
 
 **Luồng ghi âm**
 
-1. Trigger mở `RecordActivity` (trong suốt, `showWhenLocked`, `turnScreenOn`): rung nhẹ, bắt đầu ghi ngay.
-2. Phát hiện im lặng qua `getMaxAmplitude()` mỗi 100 ms; im lặng 1,5 giây sau khi đã có tiếng thì dừng. Có nút Dừng / Hủy.
+1. Trigger mở `RecordActivity` (trong suốt, `showWhenLocked`, `turnScreenOn`, giữ màn hình sáng khi đang ghi): rung nhẹ, bắt đầu ghi ngay.
+2. Phát hiện im lặng qua `getMaxAmplitude()` mỗi 100 ms; tiếng to kéo dài ít nhất 0,2 giây mới tính là tiếng nói (bỏ qua tiếng chạm máy); im lặng 1,5 giây sau khi đã có tiếng thì dừng; 8 giây đầu không có tiếng nói thì hủy, không upload, báo "Không nghe thấy gì"; tối đa 30 giây. Có nút Dừng / Hủy. (bổ sung 2026-10-24)
 3. Lưu file vào bộ nhớ app, tạo `PendingUpload` (`entry_id` = UUID, `recorded_at`), đóng Activity ngay.
-4. `UploadWorker` (ràng buộc có mạng, retry backoff) gửi `POST /voice`, xong thì xóa file.
+4. `UploadWorker` (ràng buộc có mạng, retry backoff) gửi `POST /voice`, xong thì xóa file. Trong lúc chờ: notification im lặng "Đang xử lý…" kèm thanh tiến trình chạy liên tục (không biết % nên không hiện phần trăm); mất mạng thì "Đã lưu, sẽ gửi khi có mạng", có mạng lại thì chuyển sang "Đang xử lý…". (bổ sung 2026-10-24)
 5. `ResultNotifier` hiện `✓ Bánh mì · 20.000đ · Ăn sáng · Tiền mặt` (nhiều giao dịch thì gộp 1 notification), nút **Hoàn tác** gọi `/voice/{entry_id}/undo`. Lỗi 422 thì hiện "Không hiểu, nói lại nhé" kèm câu đã nghe được.
 
 **Màn hình Hôm nay** (màn hình mặc định)

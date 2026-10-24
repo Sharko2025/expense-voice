@@ -18,6 +18,8 @@ enum class Rejection { MISSING_FILE, INVALID_RECORDING, SERVER_ERROR }
 
 /** Where upload/undo outcomes are reported (notifications in the app, a fake in tests). */
 interface ResultSink {
+    /** About to send the recording; may be called again on every retry. */
+    fun processing(entryId: String)
     fun success(entryId: String, transactions: List<TransactionDto>)
     fun notUnderstood(entryId: String, rawText: String?)
     fun rejected(entryId: String, reason: Rejection)
@@ -43,6 +45,7 @@ class UploadProcessor(
             return Step.DONE
         }
 
+        results.processing(entryId)
         val resp = try {
             api().postVoice(
                 file = MultipartBody.Part.createFormData("file", file.name, file.asRequestBody("audio/mp4".toMediaType())),

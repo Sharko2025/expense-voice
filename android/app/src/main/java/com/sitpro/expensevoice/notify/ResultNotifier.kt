@@ -49,11 +49,18 @@ class ResultNotifier(private val context: Context) : ResultSink {
         )
     }
 
-    fun sending(entryId: String, online: Boolean) = post(
+    fun sending(entryId: String, online: Boolean) {
+        if (online) processing(entryId)
+        else post(entryId, base(CHANNEL_SENDING).setContentTitle(str(R.string.notif_offline)).setSilent(true))
+    }
+
+    /** Indeterminate bar: the app can't know how far the server has got. */
+    override fun processing(entryId: String) = post(
         entryId,
         base(CHANNEL_SENDING)
-            .setContentTitle(str(if (online) R.string.notif_sending else R.string.notif_offline))
-            .setOngoing(online)
+            .setContentTitle(str(R.string.notif_sending))
+            .setProgress(0, 0, true)
+            .setOngoing(true)
             .setSilent(true),
     )
 
