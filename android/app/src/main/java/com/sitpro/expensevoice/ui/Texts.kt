@@ -57,8 +57,11 @@ class Texts(private val res: Resources) {
     fun dayTitle(day: LocalDate, today: LocalDate): String = when (day) {
         today -> res.getString(R.string.tab_today)
         today.minusDays(1) -> res.getString(R.string.yesterday)
-        else -> pattern(R.string.pattern_day_title).format(day).replaceFirstChar { it.uppercase() }
+        else -> fullDate(day)
     }
+
+    /** "Thứ Bảy, 25/10" — the day name always, never "Hôm qua". */
+    fun fullDate(day: LocalDate): String = pattern(R.string.pattern_day_title).format(day).replaceFirstChar { it.uppercase() }
 
     fun shortDate(day: LocalDate): String = pattern(R.string.pattern_short_date).format(day)
 

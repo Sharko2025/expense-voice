@@ -28,3 +28,5 @@
 - 2026-10-15 · Logo app · Loi chọn phương án 7 "Vây cá mập tối giản" (canvas https://claude.ai/artifact/SU3SWyAcQdD7kurZThQgAJ). Icon "Record expense": nền cam, micro navy. Icon notification: vây cá mập trắng. Widget: nền navy.
 - 2026-10-15 · Tên dưới icon · Loi muốn luôn là **Ví Cá Mập** (kể cả máy để English); icon ghi âm rút gọn thành **Record** / **Ghi âm**. Tiêu đề trong app vẫn theo ngôn ngữ app.
 - 2026-10-24 · Thanh tiến trình trong app + chọn nhiều để xóa (yêu cầu mới) · Kế hoạch `docs/plans/in-app-progress-multiselect.md`. **Đã duyệt 2026-10-24**, đã ghi vào SPEC.
+- 2026-10-27 · Ghi âm cho ngày cũ đang xem + xem từng giao dịch theo danh mục ở Tháng này + bấm tab Hôm nay về ngay hôm nay (yêu cầu mới) · Kế hoạch `docs/plans/backdate-voice-month-detail.md`. **Đã duyệt 2026-10-27**: ngày cũ ghi lúc 12:00; Tháng này mở rộng danh mục tại chỗ.
+- 2026-10-27 · Audio thật `samples/E1_1.m4a` ("Ăn sáng bánh mì à hai chục ngàn") → amount 20000 đúng nhưng merchant = "à hai chục ngàn" (sai, phải là null) · Đề xuất thêm câu này vào bộ test parse; chỉnh prompt khi làm Phase 4 "ghi lại các câu parse sai".

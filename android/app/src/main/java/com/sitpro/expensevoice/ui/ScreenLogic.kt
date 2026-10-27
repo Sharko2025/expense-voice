@@ -76,15 +76,22 @@ fun canGoForward(day: LocalDate, today: LocalDate) = day < today
 fun canGoForward(month: YearMonth, current: YearMonth) = month < current
 
 /** `name` is the server (Vietnamese) category name; translate with Texts.category when showing it. */
-data class CategoryBar(val name: String?, val totalVnd: Long, val count: Int, val fraction: Float)
+data class CategoryBar(val categoryId: Int?, val name: String?, val totalVnd: Long, val count: Int, val fraction: Float)
 
 /** Bars are relative to the biggest category so the top one fills the row. */
 fun categoryBars(summary: SummaryDto): List<CategoryBar> {
     val max = summary.byCategory.maxOfOrNull { it.totalVnd } ?: 0L
     return summary.byCategory.map {
-        CategoryBar(it.category, it.totalVnd, it.count, if (max > 0) it.totalVnd.toFloat() / max else 0f)
+        CategoryBar(it.categoryId, it.category, it.totalVnd, it.count, if (max > 0) it.totalVnd.toFloat() / max else 0f)
     }
 }
+
+/** A month's transactions per category id (null = no category), each list in the order given (newest first). */
+fun transactionsByCategory(list: List<CachedTransaction>): Map<Int?, List<CachedTransaction>> = list.groupBy { it.categoryId }
+
+/** The day the in-app mic records for: the viewed day if it's an earlier one on the Today tab, else null (= now). */
+fun recordDay(viewed: LocalDate, today: LocalDate, onTodayTab: Boolean): LocalDate? =
+    viewed.takeIf { onTodayTab && it < today }
 
 /** The in-app strip for recordings not processed yet. */
 data class PendingBanner(val kind: Kind, val count: Int) {

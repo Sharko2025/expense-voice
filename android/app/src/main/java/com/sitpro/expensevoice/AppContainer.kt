@@ -77,9 +77,11 @@ class AppContainer(context: Context) {
     val pendingDir: File = File(appContext.filesDir, "pending").apply { mkdirs() }
 
     /** Called by RecordActivity once a recording is complete. */
-    fun submitRecording(entryId: String, file: File, recordedAt: String) {
+    fun submitRecording(entryId: String, file: File, recordedAt: String, occurredOn: String? = null) {
         appScope.launch {
-            db.pendingDao().insert(PendingUpload(entryId, file.path, recordedAt, System.currentTimeMillis()))
+            db.pendingDao().insert(
+                PendingUpload(entryId, file.path, recordedAt, System.currentTimeMillis(), occurredOn = occurredOn)
+            )
             notifier.sending(entryId, scheduler.isOnline())
             scheduler.enqueue(entryId)
         }

@@ -130,6 +130,8 @@
     <!-- Recording -->
     <string name="speak_now">Speak now…</string>
     <string name="listening">Listening…</string>
+    <string name="recording_for">Recording for %s</string>
+    <string name="record_for_day">Record for %s</string>
     <string name="stop">Stop</string>
     <string name="need_mic">Allow the microphone first</string>
     <string name="mic_failed">Can\'t open the microphone</string>

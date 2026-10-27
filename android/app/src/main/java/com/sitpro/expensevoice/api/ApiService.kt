@@ -28,6 +28,8 @@ interface ApiService {
         @Part file: MultipartBody.Part,
         @Part("entry_id") entryId: RequestBody,
         @Part("recorded_at") recordedAt: RequestBody,
+        // Only for a recording made for an earlier day; Retrofit leaves out a null part.
+        @Part("occurred_on") occurredOn: RequestBody? = null,
     ): Response<VoiceResultDto>
 
     @GET("api/v1/transactions")

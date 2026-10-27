@@ -73,6 +73,16 @@ class ExpenseRepository(private val api: () -> ApiService, private val db: AppDa
 
     // ---- Month ----
 
+    /** The month's transactions, newest first; the This month screen groups them by category. */
+    fun observeMonth(month: YearMonth): Flow<List<CachedTransaction>> =
+        transactions.observeRange(month.atDay(1).toString(), month.atEndOfMonth().toString())
+
+    suspend fun refreshMonth(month: YearMonth) {
+        val from = month.atDay(1).toString()
+        val to = month.atEndOfMonth().toString()
+        transactions.replaceRange(from, to, api().transactions(from, to).map { it.toCached() })
+    }
+
     fun observeSummary(month: YearMonth): Flow<Pair<SummaryDto, Long>?> =
         db.summaryDao().observe(month.toString()).map { row ->
             row?.let { ApiJson.decodeFromString(SummaryDto.serializer(), it.json) to it.fetchedAtMillis }

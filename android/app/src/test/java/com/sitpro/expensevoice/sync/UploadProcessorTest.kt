@@ -77,9 +77,9 @@ class UploadProcessorTest {
         server.close()
     }
 
-    private suspend fun queueRecording(): File {
+    private suspend fun queueRecording(occurredOn: String? = null): File {
         val file = tmp.newFile("$entryId.m4a").apply { writeBytes(byteArrayOf(1, 2, 3)) }
-        db.pendingDao().insert(PendingUpload(entryId, file.path, "2026-10-11T08:00:00+07:00", 1L))
+        db.pendingDao().insert(PendingUpload(entryId, file.path, "2026-10-11T08:00:00+07:00", 1L, occurredOn = occurredOn))
         return file
     }
 
@@ -109,6 +109,28 @@ class UploadProcessorTest {
         val body = req.body!!.utf8()
         assertTrue(body.contains(entryId))
         assertTrue(body.contains("2026-10-11T08:00:00+07:00"))
+    }
+
+    @Test
+    fun occurredOnIsSentForAnEarlierDay() = runTest {
+        queueRecording(occurredOn = "2026-10-09")
+        respond(200, okBody)
+
+        assertEquals(UploadProcessor.Step.DONE, processor.process(entryId))
+
+        val body = server.takeRequest().body!!.utf8()
+        assertTrue(body.contains("name=\"occurred_on\""))
+        assertTrue(body.contains("2026-10-09"))
+    }
+
+    @Test
+    fun occurredOnIsLeftOutForToday() = runTest {
+        queueRecording()
+        respond(200, okBody)
+
+        processor.process(entryId)
+
+        assertFalse(server.takeRequest().body!!.utf8().contains("occurred_on"))
     }
 
     @Test

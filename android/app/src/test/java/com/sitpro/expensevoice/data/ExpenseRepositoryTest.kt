@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sitpro.expensevoice.api.createApiService
 import java.time.LocalDate
+import java.time.YearMonth
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import mockwebserver3.MockResponse
@@ -79,6 +80,36 @@ class ExpenseRepositoryTest {
         assertNotNull(result.error)
         assertEquals(listOf("b", "c"), cachedIds())
         assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun refreshMonthReplacesOnlyThatMonth() = runTest {
+        fun cached(id: String, d: String) = tx(id).copy(day = d)
+        db.transactionDao().upsert(
+            listOf(cached("sep", "2026-09-30"), cached("stale", "2026-10-15"), cached("nov", "2026-11-01"))
+        )
+        respond(200, "[${txJson("a")}]")
+
+        repo.refreshMonth(YearMonth.of(2026, 10))
+
+        val req = server.takeRequest()
+        assertEquals("2026-10-01", req.url.queryParameter("from"))
+        assertEquals("2026-10-31", req.url.queryParameter("to"))
+        assertEquals(listOf("a"), repo.observeMonth(YearMonth.of(2026, 10)).first().map { it.id })
+        assertEquals(listOf("sep"), repo.observeMonth(YearMonth.of(2026, 9)).first().map { it.id })
+        assertEquals(listOf("nov"), repo.observeMonth(YearMonth.of(2026, 11)).first().map { it.id })
+    }
+
+    @Test
+    fun observeMonthIsNewestFirst() = runTest {
+        db.transactionDao().upsert(
+            listOf(
+                tx("old").copy(day = "2026-10-02", occurredAtMillis = 1),
+                tx("new").copy(day = "2026-10-20", occurredAtMillis = 3),
+                tx("mid").copy(day = "2026-10-05", occurredAtMillis = 2),
+            )
+        )
+        assertEquals(listOf("new", "mid", "old"), repo.observeMonth(YearMonth.of(2026, 10)).first().map { it.id })
     }
 
     @Test

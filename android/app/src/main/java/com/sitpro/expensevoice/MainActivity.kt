@@ -1,7 +1,6 @@
 package com.sitpro.expensevoice
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -72,6 +71,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.collectAsState
 import com.sitpro.expensevoice.ui.PendingBanner
 import com.sitpro.expensevoice.ui.PendingStrip
+import com.sitpro.expensevoice.ui.recordDay
+import com.sitpro.expensevoice.ui.today
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
+import java.time.LocalDate
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 private enum class Tab { TODAY, MONTH, SETTINGS }
 
@@ -100,24 +106,31 @@ class MainActivity : ComponentActivity() {
 
                 val texts = rememberTexts()
                 LaunchedEffect(texts) {
-                    todayVm.messages.collect { msg ->
+                    // Each message carries the restore of the screen it came from (This month also reloads totals).
+                    merge(
+                        todayVm.messages.map { it to todayVm::restore },
+                        monthVm.messages.map { it to monthVm::restore },
+                    ).collect { (msg, restore) ->
                         val undo = msg.undoTransactionIds
                         val result = snackbar.showSnackbar(
                             texts.resolve(msg),
                             actionLabel = if (undo.isNotEmpty()) texts.get(R.string.undo) else null,
                             duration = SnackbarDuration.Short,
                         )
-                        if (result == SnackbarResult.ActionPerformed && undo.isNotEmpty()) todayVm.restore(undo)
+                        if (result == SnackbarResult.ActionPerformed && undo.isNotEmpty()) restore(undo)
                     }
                 }
                 val banner by c.pendingBanner.collectAsState(initial = null)
                 val selected by todayVm.selected.collectAsState()
+                val viewedDay by todayVm.day.collectAsState()
+                val micDay = recordDay(viewedDay, today(), onTodayTab = tab == Tab.TODAY)
                 var confirmDelete by remember { mutableStateOf(false) }
 
                 MainScaffold(
                     tab = tab,
                     onTab = {
-                        if (it == Tab.TODAY) todayVm.refresh()
+                        // The Today icon jumps back to today; Back from Settings returns to the day being viewed.
+                        if (it == Tab.TODAY) if (tab == Tab.SETTINGS) todayVm.refresh() else todayVm.goToToday()
                         if (it == Tab.MONTH) monthVm.refresh()
                         tab = it
                     },
@@ -127,7 +140,8 @@ class MainActivity : ComponentActivity() {
                     onSelectAll = todayVm::selectAll,
                     onDeleteSelected = { confirmDelete = true },
                     onExitSelection = todayVm::clearSelection,
-                    onRecord = { startActivity(Intent(this, RecordActivity::class.java)) },
+                    micDay = micDay,
+                    onRecord = { startActivity(RecordActivity.intent(this, micDay)) },
                     today = { TodayScreen(todayVm, it) },
                     month = { MonthScreen(monthVm, it) },
                     settings = { SettingsScreen(settingsVm, it) },
@@ -168,6 +182,7 @@ private fun MainScaffold(
     onSelectAll: () -> Unit,
     onDeleteSelected: () -> Unit,
     onExitSelection: () -> Unit,
+    micDay: LocalDate?,
     onRecord: () -> Unit,
     today: @androidx.compose.runtime.Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit,
     month: @androidx.compose.runtime.Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit,
@@ -211,11 +226,28 @@ private fun MainScaffold(
             // Big, centered mic: recording is the main action of the app.
             // Hidden while selecting so a stray tap doesn't start a recording.
             if (tab != Tab.SETTINGS && selectedCount == 0) {
-                FloatingActionButton(
-                    onClick = onRecord,
-                    modifier = Modifier.size(80.dp),
-                    shape = CircleShape,
-                ) { Icon(Icons.Filled.Mic, stringResource(R.string.record), Modifier.size(40.dp)) }
+                if (micDay == null) {
+                    FloatingActionButton(
+                        onClick = onRecord,
+                        modifier = Modifier.size(80.dp),
+                        shape = CircleShape,
+                    ) { Icon(Icons.Filled.Mic, stringResource(R.string.record), Modifier.size(40.dp)) }
+                } else {
+                    // Viewing an earlier day: a different colour and the date, so it's clear where it will go.
+                    val date = rememberTexts().shortDate(micDay)
+                    FloatingActionButton(
+                        onClick = onRecord,
+                        modifier = Modifier.size(80.dp),
+                        shape = CircleShape,
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                            Icon(Icons.Filled.Mic, stringResource(R.string.record_for_day, date), Modifier.size(32.dp))
+                            Text(date, style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
             }
         },
         floatingActionButtonPosition = FabPosition.Center,

@@ -121,6 +121,8 @@
     <!-- Recording -->
     <string name="speak_now">Nói đi…</string>
     <string name="listening">Đang nghe…</string>
+    <string name="recording_for">Ghi cho %s</string>
+    <string name="record_for_day">Ghi âm cho %s</string>
     <string name="stop">Dừng</string>
     <string name="need_mic">Cấp quyền micro trước nhé</string>
     <string name="mic_failed">Không mở được micro</string>

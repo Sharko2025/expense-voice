@@ -1,5 +1,6 @@
 package com.sitpro.expensevoice.data
 
+import androidx.room.AutoMigration
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -22,6 +23,7 @@ data class PendingUpload(
     val attempts: Int = 0,
     val lastError: String? = null,
     val blocked: Boolean = false, // true after 401: wait for the user to fix the token
+    val occurredOn: String? = null, // yyyy-MM-dd when recorded for an earlier day from the Today screen
 )
 
 /** Server transactions cached per Vietnam calendar day for the Today screen. Only non-deleted rows. */
@@ -96,6 +98,19 @@ interface TransactionDao {
         upsert(rows)
     }
 
+    /** Days are yyyy-MM-dd, so string comparison is date order. */
+    @Query("SELECT * FROM cached_transactions WHERE day BETWEEN :from AND :to ORDER BY occurredAtMillis DESC, id")
+    fun observeRange(from: String, to: String): Flow<List<CachedTransaction>>
+
+    @Query("DELETE FROM cached_transactions WHERE day BETWEEN :from AND :to")
+    suspend fun clearRange(from: String, to: String)
+
+    @Transaction
+    suspend fun replaceRange(from: String, to: String, rows: List<CachedTransaction>) {
+        clearRange(from, to)
+        upsert(rows)
+    }
+
     @Query("DELETE FROM cached_transactions WHERE id = :id")
     suspend fun delete(id: String)
 
@@ -141,7 +156,8 @@ interface MetaDao {
 
 @Database(
     entities = [PendingUpload::class, CachedTransaction::class, CachedSummary::class, CachedCategory::class, CacheMeta::class],
-    version = 1,
+    version = 2,
+    autoMigrations = [AutoMigration(from = 1, to = 2)], // adds pending_uploads.occurredOn, keeps the queue
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun pendingDao(): PendingDao

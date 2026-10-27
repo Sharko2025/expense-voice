@@ -8,9 +8,11 @@ import com.sitpro.expensevoice.AppContainer
 import com.sitpro.expensevoice.api.SummaryDto
 import com.sitpro.expensevoice.data.CachedCategory
 import com.sitpro.expensevoice.data.CachedTransaction
+import com.sitpro.expensevoice.data.ExpenseRepository
 import java.io.IOException
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -53,9 +56,66 @@ fun errorMessage(e: Throwable): UiMessage = when {
     else -> UiMessage(R.string.error_generic)
 }
 
+/**
+ * Edit sheet actions shared by Today and This month; outcomes go to [messages] (snackbars).
+ * [onChanged] runs after a successful save, delete or restore.
+ */
+class TransactionEditor(
+    private val repo: ExpenseRepository,
+    private val scope: CoroutineScope,
+    private val onChanged: () -> Unit = {},
+) {
+    private val _messages = MutableSharedFlow<UiMessage>(extraBufferCapacity = 4)
+    val messages: SharedFlow<UiMessage> = _messages
+
+    fun emit(message: UiMessage) {
+        _messages.tryEmit(message)
+    }
+
+    fun save(original: CachedTransaction, edit: TransactionEdit, onDone: () -> Unit) {
+        val patch = buildPatch(original, edit)
+        if (patch.isEmpty()) return onDone()
+        scope.launch {
+            try {
+                val updated = repo.update(original.id, patch)
+                onDone()
+                onChanged()
+                if (updated.day != original.day) {
+                    // It left the list being viewed; say where it went so it doesn't look lost.
+                    emit(UiMessage(R.string.moved_to, LocalDate.parse(updated.day)))
+                }
+            } catch (e: Exception) {
+                emit(errorMessage(e))
+            }
+        }
+    }
+
+    fun delete(tx: CachedTransaction, onDone: () -> Unit) {
+        scope.launch {
+            try {
+                repo.delete(tx.id)
+                onDone()
+                onChanged()
+                emit(UiMessage(R.string.deleted_item, tx.item, undoTransactionIds = listOf(tx.id)))
+            } catch (e: Exception) {
+                emit(errorMessage(e))
+            }
+        }
+    }
+
+    fun restore(ids: List<String>) {
+        scope.launch {
+            val result = repo.restoreMany(ids)
+            if (result.done.isNotEmpty()) onChanged()
+            result.error?.let { emit(errorMessage(it)) }
+        }
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class TodayViewModel(private val container: AppContainer) : ViewModel() {
     private val repo = container.repository
+    private val editor = TransactionEditor(repo, viewModelScope)
 
     val day = MutableStateFlow(today())
     val transactions: StateFlow<List<CachedTransaction>> =
@@ -66,8 +126,7 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
         repo.observeCategories().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val refreshing = MutableStateFlow(false)
-    private val _messages = MutableSharedFlow<UiMessage>(extraBufferCapacity = 4)
-    val messages: SharedFlow<UiMessage> = _messages
+    val messages: SharedFlow<UiMessage> = editor.messages
 
     init {
         refresh()
@@ -81,7 +140,7 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
             try {
                 repo.refreshDay(day.value)
             } catch (e: Exception) {
-                _messages.tryEmit(errorMessage(e))
+                editor.emit(errorMessage(e))
             } finally {
                 refreshing.value = false
             }
@@ -93,6 +152,13 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
         if (next > today()) return
         clearSelection()
         day.value = next
+        refresh()
+    }
+
+    /** The Today tab icon: always back to today, from any earlier day. */
+    fun goToToday() {
+        clearSelection()
+        day.value = today()
         refresh()
     }
 
@@ -124,55 +190,37 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
                 result.done.isEmpty() -> errorMessage(result.error)
                 else -> UiMessage(R.string.deleted_partial, listOf(result.done.size, ids.size), undoTransactionIds = result.done)
             }
-            _messages.tryEmit(message)
+            editor.emit(message)
         }
     }
 
-    fun save(original: CachedTransaction, edit: TransactionEdit, onDone: () -> Unit) {
-        val patch = buildPatch(original, edit)
-        if (patch.isEmpty()) return onDone()
-        viewModelScope.launch {
-            try {
-                val updated = repo.update(original.id, patch)
-                onDone()
-                if (updated.day != original.day) {
-                    // It left the list being viewed; say where it went so it doesn't look lost.
-                    _messages.tryEmit(UiMessage(R.string.moved_to, LocalDate.parse(updated.day)))
-                }
-            } catch (e: Exception) {
-                _messages.tryEmit(errorMessage(e))
-            }
-        }
-    }
+    fun save(original: CachedTransaction, edit: TransactionEdit, onDone: () -> Unit) = editor.save(original, edit, onDone)
 
-    fun delete(tx: CachedTransaction, onDone: () -> Unit) {
-        viewModelScope.launch {
-            try {
-                repo.delete(tx.id)
-                onDone()
-                _messages.tryEmit(UiMessage(R.string.deleted_item, tx.item, undoTransactionIds = listOf(tx.id)))
-            } catch (e: Exception) {
-                _messages.tryEmit(errorMessage(e))
-            }
-        }
-    }
+    fun delete(tx: CachedTransaction, onDone: () -> Unit) = editor.delete(tx, onDone)
 
-    fun restore(ids: List<String>) {
-        viewModelScope.launch {
-            repo.restoreMany(ids).error?.let { _messages.tryEmit(errorMessage(it)) }
-        }
-    }
+    fun restore(ids: List<String>) = editor.restore(ids)
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MonthViewModel(private val container: AppContainer) : ViewModel() {
     private val repo = container.repository
+    // Totals change after an edit (amount, category, moved to another month), so reload them.
+    private val editor = TransactionEditor(repo, viewModelScope, onChanged = ::refresh)
 
     val month = MutableStateFlow(currentMonth())
     val summary: StateFlow<Pair<SummaryDto, Long>?> =
         month.flatMapLatest { repo.observeSummary(it) }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    val byCategory: StateFlow<Map<Int?, List<CachedTransaction>>> =
+        month.flatMapLatest { repo.observeMonth(it) }.map(::transactionsByCategory)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+    val categories: StateFlow<List<CachedCategory>> =
+        repo.observeCategories().stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     val refreshing = MutableStateFlow(false)
     val error = MutableStateFlow<UiMessage?>(null)
+    val messages: SharedFlow<UiMessage> = editor.messages
+
+    /** Category ids opened in place; lives here so it survives folding the phone. */
+    val expanded = MutableStateFlow<Set<Int?>>(emptySet())
 
     init {
         refresh()
@@ -185,6 +233,7 @@ class MonthViewModel(private val container: AppContainer) : ViewModel() {
             error.value = null
             try {
                 repo.refreshSummary(month.value)
+                repo.refreshMonth(month.value)
             } catch (e: Exception) {
                 error.value = errorMessage(e)
             } finally {
@@ -196,9 +245,20 @@ class MonthViewModel(private val container: AppContainer) : ViewModel() {
     fun shiftMonth(months: Long) {
         val next = month.value.plusMonths(months)
         if (next > currentMonth()) return
+        expanded.value = emptySet()
         month.value = next
         refresh()
     }
+
+    fun toggleExpanded(categoryId: Int?) {
+        expanded.value = if (categoryId in expanded.value) expanded.value - categoryId else expanded.value + categoryId
+    }
+
+    fun save(original: CachedTransaction, edit: TransactionEdit, onDone: () -> Unit) = editor.save(original, edit, onDone)
+
+    fun delete(tx: CachedTransaction, onDone: () -> Unit) = editor.delete(tx, onDone)
+
+    fun restore(ids: List<String>) = editor.restore(ids)
 }
 
 class SettingsViewModel(private val container: AppContainer) : ViewModel() {

@@ -119,6 +119,36 @@ class ScreenLogicTest {
         assertEquals(listOf(1f, 0.25f, 0f), categoryBars(s).map { it.fraction })
     }
 
+    @Test
+    fun barsCarryTheCategoryIdToMatchTransactions() {
+        val s = SummaryDto(
+            month = "2026-10", totalVnd = 30_000, count = 2, prevMonth = "2026-09", prevTotalVnd = 0,
+            diffVnd = 0, diffPct = null,
+            byCategory = listOf(CategoryTotalDto(4, "Cafe/Đồ uống", 20_000, 1), CategoryTotalDto(null, null, 10_000, 1)),
+        )
+        assertEquals(listOf(4, null), categoryBars(s).map { it.categoryId })
+    }
+
+    @Test
+    fun transactionsAreGroupedByCategoryKeepingOrder() {
+        val a = original.copy(id = "a", categoryId = 4)
+        val b = original.copy(id = "b", categoryId = null)
+        val c = original.copy(id = "c", categoryId = 4)
+        val groups = transactionsByCategory(listOf(a, b, c))
+        assertEquals(listOf("a", "c"), groups[4]?.map { it.id })
+        assertEquals(listOf("b"), groups[null]?.map { it.id })
+        assertNull(groups[7])
+    }
+
+    @Test
+    fun micRecordsForTheViewedDayOnlyWhenItIsEarlierAndOnToday() {
+        val today = LocalDate.of(2026, 10, 27)
+        val earlier = LocalDate.of(2026, 10, 25)
+        assertEquals(earlier, recordDay(earlier, today, onTodayTab = true))
+        assertNull(recordDay(today, today, onTodayTab = true))
+        assertNull(recordDay(earlier, today, onTodayTab = false))
+    }
+
     private fun pending(id: String, blocked: Boolean = false) = PendingUpload(id, "/f/$id.m4a", "2026-10-24T08:00:00+07:00", 1L, blocked = blocked)
 
     @Test

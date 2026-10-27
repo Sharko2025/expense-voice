@@ -205,3 +205,53 @@ def test_oversized_audio_rejected(client, auth, db, stt, parser, monkeypatch):
     assert resp.status_code == 422
     assert resp.json()["detail"] == "File ghi âm quá lớn"
     assert count(db, VoiceEntry) == 0
+
+
+# ---- occurred_on: recording for an earlier day from the app ----
+
+
+def test_occurred_on_earlier_day_stores_noon_that_day(client, auth, db, stt, parser):
+    entry_id, resp = post_voice(client, auth, occurred_on="2026-10-07")
+
+    assert resp.status_code == 200
+    noon = datetime(2026, 10, 7, 12, 0, tzinfo=timezone(timedelta(hours=7)))
+    assert [datetime.fromisoformat(t["occurred_at"]) for t in resp.json()["transactions"]] == [noon]
+    # recorded_at stays the real time of speaking
+    entry = db.get(VoiceEntry, uuid.UUID(entry_id))
+    assert entry.recorded_at == datetime.fromisoformat(RECORDED_AT)
+
+
+def test_occurred_on_same_day_keeps_recorded_at(client, auth, stt, parser):
+    # 08:15 today; noon today would be in the future.
+    _, resp = post_voice(client, auth, occurred_on="2026-10-10")
+    assert resp.status_code == 200
+    assert datetime.fromisoformat(resp.json()["transactions"][0]["occurred_at"]) == datetime.fromisoformat(RECORDED_AT)
+
+
+def test_occurred_on_uses_vietnam_day_of_recorded_at(client, auth, stt, parser):
+    # 2026-10-10 01:00 in Vietnam is still 2026-10-09 in UTC; the 9th is the day before.
+    _, resp = post_voice(client, auth, recorded_at="2026-10-09T18:00:00+00:00", occurred_on="2026-10-09")
+    assert resp.status_code == 200
+    noon = datetime(2026, 10, 9, 12, 0, tzinfo=timezone(timedelta(hours=7)))
+    assert datetime.fromisoformat(resp.json()["transactions"][0]["occurred_at"]) == noon
+
+
+def test_occurred_on_future_rejected(client, auth, db, stt, parser):
+    _, resp = post_voice(client, auth, occurred_on="2026-10-11")
+    assert resp.status_code == 422
+    assert resp.json()["detail"] == "Không ghi được cho ngày tương lai"
+    assert stt.calls == []
+    assert count(db, VoiceEntry) == 0
+
+
+def test_occurred_on_bad_format_rejected(client, auth, stt, parser):
+    _, resp = post_voice(client, auth, occurred_on="07/10/2026")
+    assert resp.status_code == 422
+    assert stt.calls == []
+
+
+def test_occurred_on_resend_is_idempotent(client, auth, db, stt, parser):
+    entry_id, first = post_voice(client, auth, occurred_on="2026-10-07")
+    _, second = post_voice(client, auth, entry_id=entry_id, occurred_on="2026-10-07")
+    assert second.json() == first.json()
+    assert count(db, Transaction) == 1

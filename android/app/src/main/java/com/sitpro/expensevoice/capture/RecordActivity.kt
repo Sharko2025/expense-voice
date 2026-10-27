@@ -52,7 +52,11 @@ import com.sitpro.expensevoice.audio.SilenceDetector
 import com.sitpro.expensevoice.container
 import com.sitpro.expensevoice.ui.AppTheme
 import com.sitpro.expensevoice.ui.VN_ZONE
+import com.sitpro.expensevoice.ui.rememberTexts
+import com.sitpro.expensevoice.ui.today
+import android.content.Context
 import java.io.File
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -75,6 +79,8 @@ class RecordActivity : ComponentActivity() {
     private lateinit var entryId: String
     private lateinit var file: File
     private lateinit var recordedAt: String
+    /** Set when started from the Today screen on an earlier day; null = now. */
+    private var occurredOn: LocalDate? = null
 
     private var elapsedMs by mutableLongStateOf(0L)
     private var level by mutableFloatStateOf(0f)
@@ -97,11 +103,15 @@ class RecordActivity : ComponentActivity() {
 
         entryId = UUID.randomUUID().toString()
         file = File(container.pendingDir, "$entryId.m4a")
+        occurredOn = intent.getStringExtra(EXTRA_DAY)
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            ?.takeIf { it < today() }
         recordedAt = OffsetDateTime.now(VN_ZONE).truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
 
         setContent {
             AppTheme {
                 RecordingCard(
+                    day = occurredOn,
                     elapsedMs = elapsedMs,
                     level = level,
                     heardSpeech = heardSpeech,
@@ -158,7 +168,7 @@ class RecordActivity : ComponentActivity() {
         loop?.cancel()
         val ok = recorder.stop()
         if (save && ok && file.length() > 0) {
-            container.submitRecording(entryId, file, recordedAt)
+            container.submitRecording(entryId, file, recordedAt, occurredOn?.toString())
         } else {
             file.delete()
             if (save) toast(R.string.too_short)
@@ -172,10 +182,19 @@ class RecordActivity : ComponentActivity() {
     }
 
     private fun toast(@StringRes text: Int) = Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show()
+
+    companion object {
+        /** yyyy-MM-dd of an earlier day to record for; only the in-app mic on the Today screen sets it. */
+        const val EXTRA_DAY = "day"
+
+        fun intent(context: Context, day: LocalDate?): Intent =
+            Intent(context, RecordActivity::class.java).apply { day?.let { putExtra(EXTRA_DAY, it.toString()) } }
+    }
 }
 
 @androidx.compose.runtime.Composable
 private fun RecordingCard(
+    day: LocalDate?,
     elapsedMs: Long,
     level: Float,
     heardSpeech: Boolean,
@@ -196,6 +215,15 @@ private fun RecordingCard(
                     Icon(Icons.Filled.Mic, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(44.dp))
                 }
                 Spacer(Modifier.height(20.dp))
+                if (day != null) {
+                    // Make it obvious this is not going to today.
+                    Text(
+                        stringResource(R.string.recording_for, rememberTexts().fullDate(day)),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                    Spacer(Modifier.height(8.dp))
+                }
                 Text(stringResource(if (heardSpeech) R.string.listening else R.string.speak_now), style = MaterialTheme.typography.titleLarge)
                 Text(
                     "%d:%02d".format(elapsedMs / 60_000, elapsedMs / 1000 % 60),

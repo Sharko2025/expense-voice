@@ -51,6 +51,7 @@ class UploadProcessor(
                 file = MultipartBody.Part.createFormData("file", file.name, file.asRequestBody("audio/mp4".toMediaType())),
                 entryId = entryId.toRequestBody(),
                 recordedAt = row.recordedAt.toRequestBody(),
+                occurredOn = row.occurredOn?.toRequestBody(),
             )
         } catch (e: IOException) {
             pending.recordFailure(entryId, e.javaClass.simpleName)

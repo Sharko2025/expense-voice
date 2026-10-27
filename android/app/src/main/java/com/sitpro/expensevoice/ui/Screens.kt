@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -397,6 +399,10 @@ fun MonthScreen(vm: MonthViewModel, contentPadding: PaddingValues) {
     val cached by vm.summary.collectAsState()
     val refreshing by vm.refreshing.collectAsState()
     val error by vm.error.collectAsState()
+    val byCategory by vm.byCategory.collectAsState()
+    val expanded by vm.expanded.collectAsState()
+    val categories by vm.categories.collectAsState()
+    var editing by remember { mutableStateOf<CachedTransaction?>(null) }
 
     PullToRefreshBox(refreshing, onRefresh = vm::refresh, modifier = Modifier.fillMaxSize().padding(contentPadding)) {
         LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 112.dp)) {
@@ -438,16 +444,75 @@ fun MonthScreen(vm: MonthViewModel, contentPadding: PaddingValues) {
                     )
                 }
             }
-            items(bars, key = { it.name.orEmpty() }) { bar -> CategoryBarRow(bar, texts) }
+            bars.forEach { bar ->
+                val open = bar.categoryId in expanded
+                item(key = "cat:${bar.categoryId}") { CategoryBarRow(bar, texts, open) { vm.toggleExpanded(bar.categoryId) } }
+                if (open) {
+                    items(byCategory[bar.categoryId].orEmpty(), key = { it.id }) { tx ->
+                        MonthTransactionRow(tx, texts) { editing = tx }
+                    }
+                    item(key = "end:${bar.categoryId}") { HorizontalDivider() }
+                }
+            }
         }
+    }
+
+    editing?.let { tx ->
+        EditSheet(
+            tx = tx,
+            categories = categories,
+            onDismiss = { editing = null },
+            onSave = { edit -> vm.save(tx, edit) { editing = null } },
+            onDelete = { vm.delete(tx) { editing = null } },
+        )
     }
 }
 
+/** One transaction under an opened category: date instead of time, the category is already the heading. */
 @Composable
-private fun CategoryBarRow(bar: CategoryBar, texts: Texts) {
-    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp)) {
-        Row(Modifier.fillMaxWidth()) {
-            Text(texts.category(bar.name ?: "Khác").orEmpty(), Modifier.weight(1f))
+private fun MonthTransactionRow(tx: CachedTransaction, texts: Texts, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .clickable(onClick = onClick)
+            .padding(start = 32.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            texts.shortDate(LocalDate.parse(tx.day)),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(16.dp))
+        Column(Modifier.weight(1f)) {
+            Text(tx.item.replaceFirstChar { it.uppercase() }, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            val details = listOfNotNull(texts.method(tx.method), tx.merchant).joinToString(" · ")
+            Text(
+                details,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        Spacer(Modifier.width(12.dp))
+        Text(formatVnd(tx.amountVnd))
+    }
+}
+
+/** Tap to open/close the category's transactions in place. */
+@Composable
+private fun CategoryBarRow(bar: CategoryBar, texts: Texts, open: Boolean, onClick: () -> Unit) {
+    Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(texts.category(bar.name ?: "Khác").orEmpty(), Modifier.weight(1f, fill = false))
+            Icon(
+                if (open) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.weight(1f))
             Text(formatVnd(bar.totalVnd), fontWeight = FontWeight.Medium)
         }
         Spacer(Modifier.height(6.dp))

@@ -16,18 +16,26 @@ import com.sitpro.expensevoice.container
 import com.sitpro.expensevoice.sync.Rejection
 import com.sitpro.expensevoice.sync.ResultSink
 import com.sitpro.expensevoice.ui.Texts
+import com.sitpro.expensevoice.ui.VN_ZONE
 import com.sitpro.expensevoice.ui.formatVnd
+import com.sitpro.expensevoice.ui.today
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
 /** Text for the result notification; kept separate so it can be unit-tested. */
 data class ResultText(val title: String, val lines: List<String>)
 
-fun resultText(texts: Texts, transactions: List<TransactionDto>): ResultText {
+/** Recorded for an earlier day: the title ends with " — dd/MM" so it's clear where it went. */
+fun resultText(texts: Texts, transactions: List<TransactionDto>, today: LocalDate = today()): ResultText {
     val lines = transactions.map { texts.line(it.item, it.amountVnd, it.category, it.method) }
-    return if (transactions.size == 1) {
-        ResultText("✓ " + lines.single(), emptyList())
+    val title = if (transactions.size == 1) {
+        "✓ " + lines.single()
     } else {
-        ResultText(texts.get(R.string.notif_many, transactions.size, formatVnd(transactions.sumOf { it.amountVnd })), lines)
+        texts.get(R.string.notif_many, transactions.size, formatVnd(transactions.sumOf { it.amountVnd }))
     }
+    val day = transactions.firstOrNull()?.let { OffsetDateTime.parse(it.occurredAt).atZoneSameInstant(VN_ZONE).toLocalDate() }
+    val suffix = if (day != null && day != today) " — " + texts.shortDate(day) else ""
+    return ResultText(title + suffix, if (transactions.size == 1) emptyList() else lines)
 }
 
 class ResultNotifier(private val context: Context) : ResultSink {

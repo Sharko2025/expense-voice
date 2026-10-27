@@ -42,6 +42,7 @@ class VoiceInput:
     suffix: str
     latitude: float | None = None
     longitude: float | None = None
+    occurred_at: datetime | None = None  # None = recorded_at
 
 
 def process_voice(
@@ -76,7 +77,7 @@ def process_voice(
         for tx in normalize(raw, mapping):
             row = Transaction(
                 voice_entry_id=entry.id,
-                occurred_at=data.recorded_at,
+                occurred_at=data.occurred_at or data.recorded_at,
                 item=tx.item,
                 amount_vnd=tx.amount_vnd,
                 category_id=tx.category_id,
