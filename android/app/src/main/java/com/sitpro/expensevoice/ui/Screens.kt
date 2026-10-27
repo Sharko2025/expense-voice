@@ -505,14 +505,22 @@ private fun MonthTransactionRow(tx: CachedTransaction, texts: Texts, onClick: ()
 private fun CategoryBarRow(bar: CategoryBar, texts: Texts, open: Boolean, onClick: () -> Unit) {
     Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 20.dp, vertical = 10.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(texts.category(bar.name ?: "Khác").orEmpty(), Modifier.weight(1f, fill = false))
-            Icon(
-                if (open) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.weight(1f))
+            // Name + chevron take the free space (name shortened on the cover screen); amount stays right-aligned.
+            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    texts.category(bar.name ?: "Khác").orEmpty(),
+                    Modifier.weight(1f, fill = false),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Icon(
+                    if (open) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(12.dp))
             Text(formatVnd(bar.totalVnd), fontWeight = FontWeight.Medium)
         }
         Spacer(Modifier.height(6.dp))
