@@ -109,7 +109,7 @@ Mọi endpoint đều yêu cầu header `Authorization: Bearer <DEVICE_TOKEN>`; 
 
 | Method | Endpoint | Việc làm | Trả về |
 | --- | --- | --- | --- |
-| POST | `/voice` | Nhận audio (multipart: `file`, `entry_id`, `recorded_at`, `lat?`, `lng?`), transcribe, parse, lưu | `entry_id`, `raw_text`, danh sách giao dịch đã tạo |
+| POST | `/voice` | Nhận audio (multipart: `file`, `entry_id`, `recorded_at`, `occurred_on?`, `lat?`, `lng?`), transcribe, parse, lưu | `entry_id`, `raw_text`, danh sách giao dịch đã tạo |
 | GET | `/transactions?from=&to=` | Danh sách giao dịch trong khoảng ngày, mới nhất trước | mảng giao dịch |
 | PATCH | `/transactions/{id}` | Sửa item, amount, category, method, merchant, occurred\_at | giao dịch sau khi sửa |
 | DELETE | `/transactions/{id}` | Xóa mềm (đặt `deleted_at`) | 204 |
@@ -123,6 +123,7 @@ Mọi endpoint đều yêu cầu header `Authorization: Bearer <DEVICE_TOKEN>`; 
 
 - `POST /voice` **idempotent** theo `entry_id`: app gửi lại cùng `entry_id` thì trả kết quả cũ, không tạo trùng.
 - Xử lý đồng bộ trong request (mục tiêu dưới 3 giây). Timeout OpenAI 20 giây; lỗi thì lưu `status=failed`, trả 502 để app thử lại sau.
+- `occurred_on` (`YYYY-MM-DD`, bổ sung 2026-10-27): ghi cho ngày trước ngày nói → `occurred_at` = 12:00 giờ VN của ngày đó; trùng ngày nói → bỏ qua, dùng `recorded_at`; ngày tương lai → 422. `recorded_at` luôn là giờ nói thật.
 - Parse ra 0 giao dịch (câu không có số tiền) → trả 422 kèm `raw_text`, app hiện thông báo "Không hiểu, nói lại nhé".
 - `GET /summary` tính theo múi giờ `Asia/Ho_Chi_Minh`, bỏ các giao dịch đã xóa mềm.
 
