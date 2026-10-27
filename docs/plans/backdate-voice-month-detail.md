@@ -1,6 +1,6 @@
 # Ghi âm cho ngày cũ + Xem chi tiết danh mục trong Tháng này
 
-Trạng thái: **đã duyệt** · 2026-10-27 (giờ 12:00, phương án A: mở rộng tại chỗ)
+Trạng thái: **xong** · 2026-10-27 (giờ 12:00, phương án A: mở rộng tại chỗ). Đã deploy EC2, Loi kiểm tra trên Fold 8: đạt.
 
 Loi yêu cầu (2026-10-27), ngoài SPEC hiện tại:
 

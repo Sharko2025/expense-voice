@@ -235,14 +235,15 @@ app/src/main/java/.../
 - Tổng chi hôm nay ở trên cùng.
 - Danh sách giao dịch mới nhất trước: giờ · món · số tiền · danh mục · phương thức (để trống thì hiện dấu `?`).
 - Chạm vào 1 dòng → bottom sheet sửa (item, số tiền, ngày, giờ, danh mục, phương thức, nơi mua) hoặc xóa. Ngày giờ theo giờ Việt Nam, không cho chọn tương lai; chuyển sang ngày khác thì báo "Đã chuyển sang dd/MM".
-- Kéo xuống để tải lại; chuyển ngày bằng mũi tên trái/phải.
-- Nút micro nổi để ghi âm ngay trong app.
+- Kéo xuống để tải lại; chuyển ngày bằng mũi tên trái/phải. Bấm icon **Hôm nay** ở thanh dưới luôn về ngay hôm nay (Back từ Cài đặt thì giữ ngày đang xem). (bổ sung 2026-10-27)
+- Nút micro nổi để ghi âm ngay trong app. Đang xem ngày cũ → nút đổi màu, hiện `dd/MM`; màn ghi âm hiện "Ghi cho Thứ …, dd/MM"; giao dịch lưu vào ngày đó lúc 12:00, notification thêm " — dd/MM". Nút nguồn, tile, widget, micro ở Tháng này luôn ghi cho hôm nay. (bổ sung 2026-10-27)
 - Nhấn giữ 1 dòng → chế độ chọn nhiều: chạm để chọn/bỏ chọn, "Chọn tất cả", nút xóa (hỏi xác nhận "Xóa n giao dịch?") → snackbar "Đã xóa n giao dịch" + **Hoàn tác** khôi phục tất cả. Lỗi giữa chừng thì dừng, báo "Đã xóa x/n", Hoàn tác vẫn khôi phục các mục đã xóa. Nút micro ẩn khi đang chọn; Back hoặc ✕ để thoát. (bổ sung 2026-10-24)
 
 **Màn hình Tháng này**
 
 - Tổng chi tháng, chênh lệch so với tháng trước (số tiền và %).
 - Danh sách danh mục xếp theo số tiền giảm dần, mỗi dòng có thanh ngang tỷ lệ vẽ bằng Compose (không dùng thư viện biểu đồ).
+- Chạm 1 danh mục → mở rộng tại chỗ, hiện từng giao dịch của danh mục trong tháng (`dd/MM` · món · số tiền), mới nhất trước; chạm lại để thu gọn, mở được nhiều danh mục. Chạm 1 giao dịch → màn sửa như ở Hôm nay; sửa/xóa xong tổng tháng tự cập nhật. Đổi tháng thì thu gọn hết. (bổ sung 2026-10-27)
 - Chuyển tháng bằng mũi tên trái/phải.
 - Dữ liệu từ `GET /summary`; mất mạng thì hiện cache gần nhất kèm dòng "cập nhật lúc …".
 
